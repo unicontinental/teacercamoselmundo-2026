@@ -1,0 +1,135 @@
+---
+import { Image } from "astro:assets";
+import { Icon } from "astro-icon/components";
+import manifestIllustration from "../assets/animations/video-placeholder.gif";
+---
+
+<section class="bg-manifest bg-cover bg-center">
+    <div class="max-w-7xl mx-auto px-4 md:px-5 py-16 md:py-24 text-white">
+        <h2
+            class="font-wideBold text-3xl md:text-5xl mb-6 md:mb-15 md:whitespace-pre-line text-center uppercase leading-18"
+        >
+            ¿Cómo la educación te acerca a un futuro internacional?
+        </h2>
+        <div x-data="videoModal()" class="mb-8 md:mb-12">
+            <button
+                type="button"
+                class="group relative block w-full cursor-pointer"
+                @click="open()"
+                aria-haspopup="dialog"
+            >
+                <Image
+                    src={manifestIllustration}
+                    alt="Manifest Illustration"
+                    class="mx-auto w-full max-w-7xl"
+                />
+                <span class="pointer-events-none absolute inset-0 flex items-center justify-center">
+                    <span class="flex h-20 w-20 items-center justify-center rounded-full border-2 border-white transition-colors duration-200 group-hover:border-purpura">
+                        <Icon
+                            name="play"
+                            class="h-10 w-10 text-white transition-colors duration-200 group-hover:text-purpura"
+                        />
+                    </span>
+                </span>
+            </button>
+            <div
+                x-show="isOpen"
+                x-cloak
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4"
+                role="dialog"
+                aria-modal="true"
+                @click.self="close()"
+                @keydown.escape.window="close()"
+            >
+                <div class="relative w-full max-w-4xl">
+                    <button
+                        type="button"
+                        class="absolute -top-10 right-0 text-white cursor-pointer"
+                        @click="close()"
+                        aria-label="Cerrar video"
+                    >
+                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6l-12 12" />
+                        </svg>
+                    </button>
+                    <div class="aspect-video w-full overflow-hidden bg-black">
+                        <iframe
+                            x-ref="iframe"
+                            title="Video manifest"
+                            class="h-full w-full"
+                            src=""
+                            allow="autoplay; fullscreen; picture-in-picture"
+                            allowfullscreen
+                        ></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="max-w-3xl mx-auto" x-data="{ isOpen: false }">
+            <button
+                type="button"
+                class="w-full flex items-center justify-between gap-4 px-6 py-4 text-center"
+                @click="isOpen = !isOpen"
+                :aria-expanded="isOpen.toString()"
+                aria-controls="manifest-text"
+            >
+                <span
+                    class="inline-flex h-20 w-20 items-center justify-center transition-transform duration-200 mx-auto"
+                    :class="{ 'rotate-180': isOpen }"
+                    aria-hidden="true"
+                >
+                    <svg
+                        class="h-20 w-20 text-white"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                    >
+                        <path
+                            fill-rule="evenodd"
+                            d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z"
+                            clip-rule="evenodd"></path>
+                    </svg>
+                </span>
+            </button>
+            <div
+                id="manifest-text"
+                x-show="isOpen"
+                x-cloak
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 -translate-y-1"
+                x-transition:enter-end="opacity-100 translate-y-0"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 translate-y-0"
+                x-transition:leave-end="opacity-0 -translate-y-1"
+                class="mt-4 px-6 py-5 text-base md:text-lg leading-relaxed text-center whitespace-pre-line"
+            >
+                Hay historias que empiezan con esfuerzo, con sacrificios silenciosos, con familias que creen incluso cuando el camino parece cuesta arriba. Historias donde cada paso ha dejado huella, porque rendirse nunca fue una opción.
+                
+                Los grandes logros no llegan por azar.
+                Llegan cuando sigues adelante con el corazón apretado y la esperanza intacta. Cuando decides que tu talento merece una oportunidad real. Cuando entiendes que el conocimiento no es solo una herramienta, sino una promesa: la promesa de una vida distinta, de un mundo mejor.
+                
+                Hoy, ser internacional no es alejarte de los tuyos.
+                Es abrir la mente sin cerrar las raíces.
+                Es descubrir que el mundo también puede alcanzarte a ti.
+                Que no importa desde dónde empiezas, sino hasta dónde te atreves a llegar.
+                
+                En la Universidad Continental, el mundo no es un sueño lejano.
+                Se vive. Se siente. Se comparte.
+                En aulas conectadas con otros países, en docentes extranjeros que amplían horizontes, en experiencias académicas que te enlazan con Estados Unidos, México, España y más allá.
+                
+                Aquí, las fronteras se diluyen ante tu constancia, ante tu valor y curiosidad. 
+                Porque estudiar en la Universidad Continental es honrar a quienes te apoyaron cuando parecía imposible. Es demostrar que el sacrificio valió la pena. Es transformar una historia de lucha en una historia de orgullo.
+                
+                Porque cuando estudias con propósito, no solo cambias tu futuro. Cambias la forma en que te miras, en que te miran. Cambias lo que creías merecer. Y llega ese momento —silencioso, único— en el que entiendes que sí, que todo este esfuerzo tenía sentido y siempre valió la pena.
+                
+                Te acercamos el mundo. Elige un futuro
+                internacional en la Universidad Continental.
+            </div>
+        </div>
+    </div>
+</section>

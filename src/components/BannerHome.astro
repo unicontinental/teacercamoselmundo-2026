@@ -1,0 +1,30 @@
+---
+import { Image } from "astro:assets";
+import bannerMobile from "../assets/bg-banner-sm.png";
+import bannerDesktop from "../assets/bg-banner.webp";
+import teAcercamos from "../assets/te-acercamos.svg";
+import elMundo from "../assets/el-mundo.svg";
+import futuro from "../assets/elige-un-futuro-internacional.svg";
+---
+<section class="relative bg-black overflow-hidden">
+  <picture class="absolute inset-0 w-full h-full pointer-events-none">
+    <source srcset={bannerDesktop.src} media="(min-width: 791px)" />
+    <Image
+      src={bannerMobile}
+      alt=""
+      class="w-full h-full object-cover object-center"
+      loading="lazy"
+    />
+  </picture>
+
+  <div class="relative z-10 max-w-7xl mx-auto px-4 lg:px-5 py-16 lg:py-24">
+    <div class="h-52 md:h-180"></div>
+    <div> 
+      <div class="flex items-center gap-4 max-w-7xl">
+        <Image src={teAcercamos} alt="Te acercamos al mundo" class="w-full h-full md:max-w-7/12" />
+        <Image src={elMundo} alt="El mundo" class="w-full h-full md:max-w-5/12" />
+      </div>
+      <Image src={futuro} alt="Elige un futuro internacional" class="w-full h-full md:max-w-220 object-center mx-auto" />
+    </div>
+  </div>
+</section>

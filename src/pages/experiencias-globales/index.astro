@@ -1,0 +1,20 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import SectionTitle from "../../components/SectionTitle.astro";
+import { Image } from "astro:assets";
+import masAlladeLosLibros from "../../assets/mas-alla-de-los-libros.png";
+---
+
+<Layout>
+    <SectionTitle title="Experiencias Globales" />
+    <section>
+        <div class="max-w-7xl mx-auto px-4 md:px-5 py-16 md:py-24 relative">
+            <Image src={masAlladeLosLibros} alt="Experiencias Globales" width={1460} height={497} />
+            <div class="absolute top-0 left-0 w-full h-full bg-black/50">
+                <h2 class="font-wideBold text-3xl md:text-5xl md:whitespace-pre-line text-center uppercase leading-18 text-white">
+                    Mas allá de los libros
+                </h2>
+            </div>
+        </div>
+    </section>
+</Layout>

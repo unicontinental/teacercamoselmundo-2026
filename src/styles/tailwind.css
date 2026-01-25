@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+
+@theme {
+	--color-black: #121212;
+	--color-dorado: #cabe7c;
+	--color-gris: #B4B9B9;
+	--color-morado: #500ab2;
+	--color-purpura: #6802C1;
+	--color-morado-oscuro: #10021D;
+	--color-morado_light: #42009f;
+	--color-plomo: #f3f3f3;
+	--font-wideBold: "Neue Plak WideBold", sans-serif;
+	--background-image-manifest: url("/src/assets/bg-manifest.png");
+	--background-image-experiencias: url("/src/assets/bg-experiencias.png");
+	--font-sans: "Neue Plak", sans-serif;
+}
+
+@font-face {
+	font-family: "Neue Plak";
+	src: url(/fonts/NeuePlak-Regular.woff2) format("woff2");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Neue Plak WideBold";
+	src: url(/fonts/NeuePlak-WideBold.woff2) format("woff2");
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
