@@ -3,13 +3,11 @@ services:
     image: nginx:alpine
     ports:
       - "80:80"
-      - "4321:4321"
     volumes:
       - ./dist:/usr/share/nginx/html:ro
     command: >
       sh -c "printf '%s\n' 'server {'
         '  listen 80;'
-        '  listen 4321;'
         '  server_name _;'
         '  root /usr/share/nginx/html;'
         '  index index.html;'
