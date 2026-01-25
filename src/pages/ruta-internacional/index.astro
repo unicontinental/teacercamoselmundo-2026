@@ -10,13 +10,35 @@ import Memberships from "../../components/Memberships.astro";
 import Acordeon from "../../components/Acordeon.astro";
 import pontificiaChile from "../../assets/pontificia-chile.png";
 import saopauloBrasil from "../../assets/saopaulo-brasil.png";
+import estadualBrasil from "../../assets/estadual-brasil.png";
+import tecMonterrey from "../../assets/tec-mexico.png";
+import Cie from "../../components/Cie.astro";
 ---
 
 <Layout>
     <SectionTitle title="Ruta Internacional" />
     <GlobalExperience />
     <hr class="border-gris max-w-7xl mx-auto" />
-    <Metrics />
+    <Metrics
+        items={[
+            {
+                value: "+100k",
+                description: "Estudiantes confían en nuestra calidad académica internacional",
+            },
+            {
+                value: "+39k",
+                description: "Estudiantes en clases en simultáneo con universidades del extranjero",
+            },
+            {
+                value: "+15k",
+                description: "Estudiantes vivieron experiencias multiculturales",
+            },
+            {
+                value: "+400",
+                description: "Docentes con experiencias académicas internacionales",
+            },
+        ]}
+    />
     <Map />
     <Internationalization />
     <DoubleDegree />
@@ -38,15 +60,19 @@ import saopauloBrasil from "../../assets/saopaulo-brasil.png";
 				paragraph: "Universida de São Paulo",
 			},
 			{
-				image: pontificiaChile,
-				title: "Multicampus",
-				paragraph: "Para que sin importar donde estés puedas acceder a la mejor educación con la misma calidad internacional, recursos y acompañamiento que te ayudarán a dar lo mejor de ti.",
+				image: estadualBrasil,
+				title: "🇧🇷 Brasil",
+				paragraph: "Universidad Estadual de Campinas",
 			},
 			{
-				image: saopauloBrasil,
-				title: "Multipaís",
-				paragraph: "Para que las fronteras desaparezcan y el mundo sea tu espacio de aprendizaje y experiencia global.",
+				image: tecMonterrey,
+				title: "🇲🇽 México",
+				paragraph: "TEC de Monterrey",
 			},
 		]}
+	/>
+	<Cie 
+	title="Somos parte de Continental International Education"
+	text="En la Universidad Continental ser internacional no es una promesa lejana ni un privilegio para pocos. Es una certeza, una verdad completa, porque te ofrecemos una experiencia real que forma parte de tu formación desde el inicio. \n\nPor ello, formamos parte de <strong>Continental International Education</strong>, una <strong>organización global que integra las mejores experiencias educativas</strong> en licenciaturas, carreras técnicas, associate degrees, posgrado, educación continua e idiomas. \n\nJunto a estas instituciones, conformamos un modelo educativo único, basado en la excelencia académica internacional y la innovación."
 	/>
 </Layout>

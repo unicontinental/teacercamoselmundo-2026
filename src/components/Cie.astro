@@ -1,0 +1,72 @@
+---
+import { Icon } from "astro-icon/components";
+
+const logos = [
+    "CFU",
+    "CIC",
+    "CIE",
+    "CIU",
+    "CUMx",
+    "ESC",
+    "IC",
+    "UC",
+    "continua",
+    "posgrado",
+];
+
+const { title, text } = Astro.props;
+---
+
+<section class="relative overflow-hidden">
+    <div class="grid grid-cols-1 md:grid-cols-2">
+        <div class="bg-morado-oscuro text-white flex items-center justify-center px-6 py-10 md:py-16">
+            <div class="w-full max-w-xl space-y-6">
+                <div class="md:hidden space-y-6">
+                    <div class="flex items-center justify-center">
+                        <Icon name="CIE" class="h-12 w-auto max-w-[255px]" />
+                    </div>
+                    <div class="grid grid-cols-2 gap-6 items-center justify-items-center">
+                        <Icon name="CFU" class="h-12 w-auto max-w-[127px]" />
+                        <Icon name="CUMx" class="h-12 w-auto max-w-[145px]" />
+                        <Icon name="CIU" class="h-12 w-auto max-w-[145px]" />
+                        <Icon name="UC" class="h-12 w-auto max-w-[190px]" />
+                        <Icon name="posgrado" class="h-12 w-auto max-w-[180px]" />
+                        <Icon name="ESC" class="h-12 w-auto max-w-[212px]" />
+                        <Icon name="IC" class="h-12 w-auto max-w-[190px]" />
+                        <Icon name="CIC" class="h-12 w-auto max-w-[170px]" />
+                    </div>
+                    <div class="flex items-center justify-center">
+                        <Icon name="continua" class="h-12 w-auto max-w-[189px]" />
+                    </div>
+                </div>
+                <div class="hidden md:block space-y-6">
+                    <div class="flex items-center justify-center md:mb-12">
+                        <Icon name="CIE" class="h-12 w-auto max-w-[255px]" />
+                    </div>
+                    <div class="grid grid-cols-3 gap-6 items-center justify-items-center">
+                        <Icon name="CFU" class="h-12 w-auto max-w-[127px]" />
+                        <Icon name="CUMx" class="h-12 w-auto max-w-[145px]" />
+                        <Icon name="CIU" class="h-12 w-auto max-w-[145px]" />
+                    </div>
+                    <div class="grid grid-cols-2 gap-y-6 items-center justify-items-center">
+                        <Icon name="UC" class="h-12 w-auto max-w-[190px]" />
+                        <Icon name="posgrado" class="h-12 w-auto max-w-[180px]" />
+                        <Icon name="ESC" class="h-12 w-auto max-w-[212px]" />
+                        <Icon name="IC" class="h-12 w-auto max-w-[190px]" />
+                        <Icon name="CIC" class="h-12 w-auto max-w-[170px]" />
+                        <Icon name="continua" class="h-12 w-auto max-w-[189px]" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white flex flex-col justify-center gap-3 max-w-xl py-6 md:py-24 px-4 md:px-8">
+            <div>
+                <h2
+                    class="text-xl md:text-5xl text-black font-wideBold antialiased uppercase md:whitespace-normal leading-tight mb-4 md:mb-8 max-w-xl"
+                    set:html={title}
+                />
+                <p class="text-black text-lg whitespace-pre-line" set:html={text} />
+            </div>
+        </div>
+    </div>
+</section>
