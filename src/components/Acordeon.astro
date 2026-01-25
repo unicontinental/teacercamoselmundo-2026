@@ -1,0 +1,65 @@
+---
+import { Image } from "astro:assets";
+
+interface Item {
+	image: ImageMetadata;
+	title: string;
+	paragraph: string;
+}
+
+interface Props {
+	width?: "full" | "contained";
+	title: string;
+	paragraph?: string;
+	paragraphAlign?: "start" | "center";
+	items: Item[];
+}
+
+const {
+	width = "full",
+	title,
+	paragraph = "",
+	paragraphAlign = "start",
+	items = [],
+} = Astro.props;
+
+const widthClass = width === "full" ? "max-w-7xl" : "max-w-5xl";
+const paragraphAlignClass = paragraphAlign === "center" ? "text-center" : "text-left";
+---
+
+<section>
+	<div class={`${widthClass} mx-auto px-4 md:px-5 py-16 md:py-24`}>
+		<h2
+			class="font-wideBold text-3xl md:text-5xl mb-6 md:mb-10 md:whitespace-pre-line uppercase leading-18 text-center"
+			set:html={title}
+		/>
+		{paragraph && (
+			<p class={`text-base md:text-lg leading-relaxed text-center ${paragraphAlignClass}`}>{paragraph}</p>
+		)}
+
+		<div class="mt-10">
+			<div class="group flex sm:justify-center gap-2 w-full overflow-x-auto snap-x snap-mandatory no-scrollbar">
+				{items.map((item) => (
+					<article class="snap-start snap-always shrink-0 sm:shrink group/article relative w-full overflow-hidden md:group-hover:[&:not(:hover)]:w-[20%] md:group-focus-within:[&:not(:focus-within):not(:hover)]:w-[20%] transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.15)] before:absolute before:inset-x-0 before:bottom-0 before:h-1/3 before:bg-gradient-to-t before:from-black/50 before:transition-opacity md:before:opacity-0 md:hover:before:opacity-100 focus-within:before:opacity-100 after:opacity-0 md:group-hover:[&:not(:hover)]:after:opacity-100 md:group-focus-within:[&:not(:focus-within):not(:hover)]:after:opacity-100 after:absolute after:inset-0 after:bg-white/30 after:backdrop-blur-xs after:transition-all rounded-xl">
+						<div class="absolute inset-0 text-black z-10">
+							<div class="text-white absolute inset-x-0 bottom-0 m-2 md:m-3 md:mr-24 p-3 md:py-3 md:px-6 md:opacity-0 group-hover/article:opacity-100 group-focus-within/article:opacity-100 md:translate-y-2 group-hover/article:translate-y-0 group-focus-within/article:translate-y-0 transition duration-200 ease-[cubic-bezier(.5,.85,.25,1.8)] group-hover/article:delay-300 group-focus-within/article:delay-300 rounded-lg">
+								<div class="flex items-end gap-2">
+									<h3 class="text-xl md:text-xl">{item.title}</h3>
+								</div>
+								<span class="text-sm md:text-base font-bold">{item.paragraph}</span>
+							</div>
+						</div>
+						<Image
+							src={item.image}
+							alt={item.title}
+							width={783}
+							height={544}
+							class="object-cover h-72 md:h-[34rem] md:w-auto"
+						/>
+						<div class="bg-black h-24 sm:h-0"></div>
+					</article>
+				))}
+			</div>
+		</div>
+	</div>
+</section>

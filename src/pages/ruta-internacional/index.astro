@@ -7,6 +7,9 @@ import Map from "../../components/Map.astro";
 import Internationalization from "../../components/Internationalization.astro";
 import DoubleDegree from "../../components/DoubleDegree.astro";
 import Memberships from "../../components/Memberships.astro";
+import Acordeon from "../../components/Acordeon.astro";
+import pontificiaChile from "../../assets/pontificia-chile.png";
+import saopauloBrasil from "../../assets/saopaulo-brasil.png";
 ---
 
 <Layout>
@@ -18,4 +21,32 @@ import Memberships from "../../components/Memberships.astro";
     <Internationalization />
     <DoubleDegree />
     <Memberships />
+	<Acordeon
+		width="full"
+		title="<span class='font-light'>Convenios con</span> \nUniversidades Reconocidas \nen el QS World University \nRankings"
+		paragraph="Te acercamos a las mejores universidades de Latinoamérica, según el Ranking QS, para que realices pasantías internacionales, clases en simultáneo con estudiantes y docentes extranjeros, y más."
+		paragraphAlign="center"
+		items={[
+			{
+				image: pontificiaChile,
+				title: "🇨🇱 Chile",
+				paragraph: "Pontificia Universidad Católica de Chile",
+			},
+			{
+				image: saopauloBrasil,
+				title: "🇧🇷 Brasil",
+				paragraph: "Universida de São Paulo",
+			},
+			{
+				image: pontificiaChile,
+				title: "Multicampus",
+				paragraph: "Para que sin importar donde estés puedas acceder a la mejor educación con la misma calidad internacional, recursos y acompañamiento que te ayudarán a dar lo mejor de ti.",
+			},
+			{
+				image: saopauloBrasil,
+				title: "Multipaís",
+				paragraph: "Para que las fronteras desaparezcan y el mundo sea tu espacio de aprendizaje y experiencia global.",
+			},
+		]}
+	/>
 </Layout>
