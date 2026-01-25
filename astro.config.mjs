@@ -12,6 +12,9 @@ export default defineConfig({
 		alpinejs({ entrypoint: "/src/alpine.js" }),
     ],
     vite: {
+        preview: {
+            allowedHosts: true,
+        },
         plugins: [tailwindcss()],
     },
 });
