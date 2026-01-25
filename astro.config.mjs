@@ -13,7 +13,10 @@ export default defineConfig({
     ],
     vite: {
         preview: {
-            allowedHosts: true,
+            allowedHosts: ["teacercamoselmundo-frontend-9xbkdz-102529-209-38-71-121.traefik.me"],
+        },
+        server: {
+            allowedHosts: ["teacercamoselmundo-frontend-9xbkdz-102529-209-38-71-121.traefik.me"],
         },
         plugins: [tailwindcss()],
     },
