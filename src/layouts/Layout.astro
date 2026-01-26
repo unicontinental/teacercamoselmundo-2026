@@ -19,6 +19,14 @@ import { Icon } from "astro-icon/components";
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Te Acercamos el Mundo" />
     <meta name="twitter:image" content="/miniatura.jpg" />
+
+    <script async is:inline src={`https://www.googletagmanager.com/gtag/js?id=G-BDRRV0B80Z`}></script>
+    <script is:inline define:vars={{ tagmanager: 'G-BDRRV0B80Z' }}>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', tagmanager);
+    </script>
   </head>
   <body>
     <Header />
@@ -28,7 +36,7 @@ import { Icon } from "astro-icon/components";
       href="https://wa.me/51971115546"
       target="_blank"
       rel="noopener noreferrer"
-      class="fixed bottom-4 right-4 z-50 md:w-[168px] h-auto w-20 drop-shadow-lg"
+      class="fixed bottom-4 right-4 z-50 md:w-42 h-auto w-20 drop-shadow-lg"
       aria-label="WhatsApp"
     >
       <Icon name="wsp" class="h-full w-full" aria-hidden="true" />

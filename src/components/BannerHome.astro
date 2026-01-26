@@ -8,18 +8,19 @@ import futuro from "../assets/elige-un-futuro-internacional.svg";
 ---
 <section class="relative bg-black overflow-hidden">
   <picture class="absolute inset-0 w-full h-full pointer-events-none">
-    <source srcset={bannerDesktop.src} media="(min-width: 791px)" />
+    <source srcset={bannerDesktop.src} media="(min-width: 768px)" />
+    <source srcset={bannerMobile.src} media="(max-width: 767px)" />
     <Image
-      src={bannerMobile}
+      src={bannerDesktop}
       alt=""
       class="w-full h-full object-cover object-center"
       loading="lazy"
     />
   </picture>
 
-  <div class="relative z-10 max-w-7xl mx-auto px-4 lg:px-5 py-16 lg:py-24">
-    <div class="h-52 md:h-180"></div>
-    <div> 
+  <div class="relative z-10 max-w-7xl mx-auto px-4 lg:px-5 py-16 lg:py-20">
+    <div class="h-52 md:h-120"></div>
+    <div>
       <div class="flex items-center gap-4 max-w-7xl">
         <Image src={teAcercamos} alt="Te acercamos al mundo" class="w-full h-full md:max-w-7/12 enter-left" />
         <Image src={elMundo} alt="El mundo" class="w-full h-full md:max-w-5/12 enter-right" />
