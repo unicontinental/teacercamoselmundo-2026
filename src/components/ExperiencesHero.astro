@@ -25,10 +25,10 @@ const { image, alt, title, videoId = "dQw4w9WgXcQ" } = Astro.props;
                             aria-haspopup="dialog"
                             aria-label="Reproducir video"
                         >
-                            <span class="flex h-[69px] w-[69px] items-center justify-center rounded-full bg-purpura">
+                            <span class="flex md:h-[69px] md:w-[69px] h-[40px] w-[40px] items-center justify-center rounded-full bg-purpura">
                                 <Icon name="play" class="h-10 w-10 text-white" />
                             </span>
-                            <span class="text-base md:text-2xl font-wideBold uppercase leading-tight max-w-2xl">
+                            <span class="text-xs text-left md:text-2xl font-wideBold uppercase leading-tight max-w-2xl">
                                 {title}
                             </span>
                         </button>
