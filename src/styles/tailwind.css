@@ -11,8 +11,8 @@
 	--color-morado_light: #42009f;
 	--color-plomo: #f3f3f3;
 	--font-wideBold: "Neue Plak WideBold", sans-serif;
-	--background-image-manifest: url("/src/assets/bg-manifest.png");
-	--background-image-experiencias: url("/src/assets/bg-experiencias.png");
+	--background-image-manifest: url("/src/assets/bg-manifest.webp");
+	--background-image-experiencias: url("/src/assets/bg-experiencias.webp");
 	--font-sans: "Neue Plak", sans-serif;
 }
 
