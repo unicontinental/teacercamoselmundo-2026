@@ -18,7 +18,7 @@
 
 @font-face {
 	font-family: "Neue Plak";
-	src: url(/fonts/NeuePlak-Regular.woff2) format("woff2");
+	src: url(https://storagecie.sfo3.cdn.digitaloceanspaces.com/fonts/NeuePlak-Regular.woff2) format("woff2");
 	font-weight: 400;
 	font-style: normal;
 	font-display: swap;
@@ -26,7 +26,7 @@
 
 @font-face {
 	font-family: "Neue Plak WideBold";
-	src: url(/fonts/NeuePlak-WideBold.woff2) format("woff2");
+	src: url(https://storagecie.sfo3.cdn.digitaloceanspaces.com/fonts/NeuePlak-WideBold.woff2) format("woff2");
 	font-weight: 700;
 	font-style: normal;
 	font-display: swap;
