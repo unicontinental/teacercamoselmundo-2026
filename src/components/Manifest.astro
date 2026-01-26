@@ -74,7 +74,7 @@ import manifestIllustration from "../assets/animations/video-placeholder.gif";
         <div class="max-w-3xl mx-auto" x-data="{ isOpen: false }">
             <button
                 type="button"
-                class="w-full flex items-center justify-between gap-4 px-6 py-4 text-center"
+                class="w-full flex items-center justify-between gap-4 px-6 py-4 text-center animate-bounce"
                 @click="isOpen = !isOpen"
                 :aria-expanded="isOpen.toString()"
                 aria-controls="manifest-text"
