@@ -1,20 +1,76 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import SectionTitle from "../../components/SectionTitle.astro";
-import { Image } from "astro:assets";
+import ExperiencesHero from "../../components/ExperiencesHero.astro";
+import ExperiencesGrid from "../../components/ExperiencesGrid.astro";
 import masAlladeLosLibros from "../../assets/mas-alla-de-los-libros.png";
 ---
 
 <Layout>
     <SectionTitle title="Experiencias Globales" />
-    <section>
-        <div class="max-w-7xl mx-auto px-4 md:px-5 py-16 md:py-24 relative">
-            <Image src={masAlladeLosLibros} alt="Experiencias Globales" width={1460} height={497} />
-            <div class="absolute top-0 left-0 w-full h-full bg-black/50">
-                <h2 class="font-wideBold text-2xl md:text-5xl md:whitespace-pre-line text-center uppercase leading-tight md:leading-18 text-white">
-                    Mas allá de los libros
-                </h2>
-            </div>
-        </div>
-    </section>
+    <ExperiencesHero
+        image={masAlladeLosLibros}
+        alt="Más allá de los libros"
+        title="MAS ALLÁ DE LOS LIBROS: EL ESFUERZO DE LOS ESTUDIANTES PARA CUMPLIR SUS SUEÑOS."
+        videoId="dQw4w9WgXcQ"
+    />
+    <ExperiencesGrid
+        perPage={6}
+        items={[
+            {
+                id: 1,
+                title: "Más allá de los libros: el esfuerzo de los estudiantes",
+                src: masAlladeLosLibros.src,
+                videoId: "dQw4w9WgXcQ",
+            },
+            {
+                id: 2,
+                title: "Más allá de los libros: el esfuerzo de los estudiantes",
+                src: masAlladeLosLibros.src,
+                videoId: "dQw4w9WgXcQ",
+            },
+            {
+                id: 3,
+                title: "Más allá de los libros: el esfuerzo de los estudiantes",
+                src: masAlladeLosLibros.src,
+                videoId: "dQw4w9WgXcQ",
+            },
+            {
+                id: 4,
+                title: "Más allá de los libros: el esfuerzo de los estudiantes",
+                src: masAlladeLosLibros.src,
+                videoId: "dQw4w9WgXcQ",
+            },
+            {
+                id: 5,
+                title: "Más allá de los libros: el esfuerzo de los estudiantes",
+                src: masAlladeLosLibros.src,
+                videoId: "dQw4w9WgXcQ",
+            },
+            {
+                id: 6,
+                title: "Más allá de los libros: el esfuerzo de los estudiantes",
+                src: masAlladeLosLibros.src,
+                videoId: "dQw4w9WgXcQ",
+            },
+            {
+                id: 7,
+                title: "Más allá de los libros: el esfuerzo de los estudiantes",
+                src: masAlladeLosLibros.src,
+                videoId: "dQw4w9WgXcQ",
+            },
+            {
+                id: 8,
+                title: "Más allá de los libros: el esfuerzo de los estudiantes",
+                src: masAlladeLosLibros.src,
+                videoId: "dQw4w9WgXcQ",
+            },
+            {
+                id: 9,
+                title: "Más allá de los libros: el esfuerzo de los estudiantes",
+                src: masAlladeLosLibros.src,
+                videoId: "dQw4w9WgXcQ",
+            },
+        ]}
+    />
 </Layout>

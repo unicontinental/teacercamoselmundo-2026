@@ -1,0 +1,135 @@
+---
+import { Icon } from "astro-icon/components";
+
+const { items = [], perPage = 6 } = Astro.props;
+const itemsJson = JSON.stringify(items);
+---
+
+<section>
+    <div class="max-w-7xl mx-auto px-4 md:px-5 pb-16 md:pb-24">
+        <div
+            class="space-y-6"
+            x-data={`{
+                items: ${itemsJson},
+                page: 1,
+                perPage: ${perPage},
+                currentVideoId: null,
+                isOpen: false,
+                get totalPages() { return Math.max(1, Math.ceil(this.items.length / this.perPage)); },
+                get paged() {
+                    const start = (this.page - 1) * this.perPage;
+                    return this.items.slice(start, start + this.perPage);
+                },
+                open(videoId) {
+                    this.currentVideoId = videoId;
+                    this.isOpen = true;
+                    this.$nextTick(() => {
+                        if (this.$refs.iframe) {
+                            this.$refs.iframe.src = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1&rel=0';
+                        }
+                    });
+                },
+                close() {
+                    this.isOpen = false;
+                    this.currentVideoId = null;
+                    if (this.$refs.iframe) this.$refs.iframe.src = '';
+                }
+            }`}
+        >
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <template x-for="item in paged" :key="item.id">
+                    <article class="relative overflow-hidden rounded-xl bg-black/5">
+                        <img
+                            :src="item.src"
+                            :alt="item.title"
+                            class="w-full h-44 md:h-52 object-cover"
+                            loading="lazy"
+                        />
+                        <div class="absolute inset-0 bg-black/30"></div>
+                        <button
+                            type="button"
+                            class="absolute left-4 bottom-4 right-4 flex items-center gap-2 text-white text-left"
+                            @click="open(item.videoId)"
+                            aria-haspopup="dialog"
+                            aria-label="Reproducir video"
+                        >
+                            <span class="flex h-10 w-10 items-center justify-center rounded-full bg-purpura">
+                                <Icon name="play" class="h-10 w-10 text-white" />
+                            </span>
+                            <p class="text-xs md:text-sm font-wideBold uppercase leading-tight" x-text="item.title"></p>
+                        </button>
+                    </article>
+                </template>
+            </div>
+
+            <div
+                x-show="isOpen"
+                x-cloak
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100"
+                x-transition:leave-end="opacity-0"
+                class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-4"
+                role="dialog"
+                aria-modal="true"
+                @click.self="close()"
+                @keydown.escape.window="close()"
+            >
+                <div class="relative w-full max-w-4xl">
+                    <button
+                        type="button"
+                        class="absolute -top-10 right-0 text-white cursor-pointer"
+                        @click="close()"
+                        aria-label="Cerrar video"
+                    >
+                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6l-12 12" />
+                        </svg>
+                    </button>
+                    <div class="aspect-video w-full overflow-hidden bg-black">
+                        <iframe
+                            x-ref="iframe"
+                            title="Video"
+                            class="h-full w-full"
+                            src=""
+                            allow="autoplay; fullscreen; picture-in-picture"
+                            allowfullscreen
+                        ></iframe>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-center gap-2 text-sm text-gray-500">
+                <button
+                    type="button"
+                    class="px-2 py-1"
+                    :disabled="page === 1"
+                    :class="{ 'opacity-50': page === 1 }"
+                    @click="page = Math.max(1, page - 1)"
+                >
+                    Prev
+                </button>
+                <template x-for="p in totalPages" :key="p">
+                    <button
+                        type="button"
+                        class="h-6 min-w-[24px] rounded text-center"
+                        :class="p === page ? 'bg-black text-white' : 'text-gray-500'"
+                        @click="page = p"
+                        x-text="p"
+                    ></button>
+                </template>
+                <button
+                    type="button"
+                    class="px-2 py-1"
+                    :disabled="page === totalPages"
+                    :class="{ 'opacity-50': page === totalPages }"
+                    @click="page = Math.min(totalPages, page + 1)"
+                >
+                    Next
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
