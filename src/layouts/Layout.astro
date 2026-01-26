@@ -8,11 +8,17 @@ import { Icon } from "astro-icon/components";
 <html lang="es">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <title>Te Acercamos el Mundo</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Te Acercamos el Mundo" />
+    <meta property="og:image" content="/miniatura.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Te Acercamos el Mundo" />
+    <meta name="twitter:image" content="/miniatura.jpg" />
   </head>
   <body>
     <Header />
