@@ -1,12 +1,11 @@
 import Alpine from 'alpinejs'
- 
+
 window.Alpine = Alpine
 
-Alpine.data('videoModal', () => ({
+Alpine.data('videoModal', (videoId) => ({
   isOpen: false,
-  videoId: '295KN-hbnZ8',
   get embedUrl() {
-    return `https://www.youtube.com/embed/${this.videoId}?autoplay=1&rel=0`
+    return `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`
   },
   open() {
     this.isOpen = true
@@ -19,5 +18,5 @@ Alpine.data('videoModal', () => ({
     if (this.$refs.iframe) this.$refs.iframe.src = ''
   },
 }))
- 
+
 Alpine.start()
