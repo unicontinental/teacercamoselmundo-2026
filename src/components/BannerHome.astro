@@ -21,10 +21,65 @@ import futuro from "../assets/elige-un-futuro-internacional.svg";
     <div class="h-52 md:h-180"></div>
     <div> 
       <div class="flex items-center gap-4 max-w-7xl">
-        <Image src={teAcercamos} alt="Te acercamos al mundo" class="w-full h-full md:max-w-7/12" />
-        <Image src={elMundo} alt="El mundo" class="w-full h-full md:max-w-5/12" />
+        <Image src={teAcercamos} alt="Te acercamos al mundo" class="w-full h-full md:max-w-7/12 enter-left" />
+        <Image src={elMundo} alt="El mundo" class="w-full h-full md:max-w-5/12 enter-right" />
       </div>
-      <Image src={futuro} alt="Elige un futuro internacional" class="w-full h-full md:max-w-220 object-center mx-auto" />
+      <Image src={futuro} alt="Elige un futuro internacional" class="w-full h-full md:max-w-220 object-center mx-auto enter-up" />
     </div>
   </div>
 </section>
+
+<style>
+  .enter-left {
+    animation: enter-left 0.8s ease-out both;
+  }
+
+  .enter-right {
+    animation: enter-right 0.8s ease-out both;
+  }
+
+  .enter-up {
+    animation: enter-up 0.8s ease-out both;
+  }
+
+  @keyframes enter-left {
+    from {
+      opacity: 0;
+      transform: translateX(-60px) scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+  }
+
+  @keyframes enter-right {
+    from {
+      opacity: 0;
+      transform: translateX(60px) scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+  }
+
+  @keyframes enter-up {
+    from {
+      opacity: 0;
+      transform: translateY(60px) scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .enter-left,
+    .enter-right,
+    .enter-up {
+      animation: none;
+    }
+  }
+</style>

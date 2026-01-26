@@ -18,10 +18,14 @@ import { Icon } from "astro-icon/components";
     <Header />
     <slot />
     <Footer />
-    <Icon
-      name="wsp"
+    <a
+      href="https://wa.me/51971115546"
+      target="_blank"
+      rel="noopener noreferrer"
       class="fixed bottom-4 right-4 z-50 md:w-[168px] h-auto w-20 drop-shadow-lg"
       aria-label="WhatsApp"
-    />
+    >
+      <Icon name="wsp" class="h-full w-full" aria-hidden="true" />
+    </a>
   </body>
 </html>
