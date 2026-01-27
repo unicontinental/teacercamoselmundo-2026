@@ -17,6 +17,7 @@ const { items = [] } = Astro.props as { items?: MetricItem[] };
         x-data="{
             prev: null,
             next: null,
+            animated: new WeakSet(),
             update() {
                 const el = this.$refs.metricsTrack;
                 if (!el) return;
@@ -29,6 +30,55 @@ const { items = [] } = Astro.props as { items?: MetricItem[] };
                 const el = this.$refs.metricsTrack;
                 if (!el || pos === null) return;
                 el.scrollTo({ left: pos, behavior: 'smooth' });
+            },
+            animateMetric(el) {
+                if (!el || this.animated.has(el)) return;
+                const raw = (el.getAttribute('data-value') || '').trim();
+                if (!raw) return;
+                const match = raw.match(/^([^0-9]*)([0-9][0-9.,]*)(.*)$/);
+                if (!match) return;
+                const prefix = match[1] || '';
+                const numStr = match[2] || '';
+                const suffix = match[3] || '';
+                const clean = numStr.replace(/,/g, '');
+                const target = Number(clean);
+                if (!Number.isFinite(target)) return;
+                const decimals = (clean.split('.')[1] || '').length;
+                const format = (value) => {
+                    const fixed = decimals ? value.toFixed(decimals) : Math.round(value).toString();
+                    return `${prefix}${fixed}${suffix}`;
+                };
+                const startAnim = () => {
+                    if (this.animated.has(el)) return;
+                    this.animated.add(el);
+                    const duration = 1200;
+                    const start = performance.now();
+                    const tick = (now) => {
+                        const progress = Math.min((now - start) / duration, 1);
+                        const value = target * progress;
+                        el.textContent = format(value);
+                        if (progress < 1) {
+                            requestAnimationFrame(tick);
+                        } else {
+                            el.textContent = raw;
+                        }
+                    };
+                    requestAnimationFrame(tick);
+                };
+                el.textContent = format(0);
+                if ('IntersectionObserver' in window) {
+                    const observer = new IntersectionObserver((entries) => {
+                        entries.forEach((entry) => {
+                            if (entry.isIntersecting) {
+                                observer.disconnect();
+                                startAnim();
+                            }
+                        });
+                    }, { threshold: 0.4 });
+                    observer.observe(el);
+                } else {
+                    startAnim();
+                }
             }
         }"
         x-init="$nextTick(() => update())"
@@ -45,7 +95,13 @@ const { items = [] } = Astro.props as { items?: MetricItem[] };
                         class="mx-auto mb-4 h-10 w-10 text-black md:h-18.75 md:w-18.75"
                         aria-hidden="true"
                     />
-                    <p class="font-wideBold text-3xl md:text-6xl text-black">{item.value}</p>
+                    <p
+                        class="font-wideBold text-3xl md:text-6xl text-black"
+                        data-value={item.value}
+                        x-init="animateMetric($el)"
+                    >
+                        {item.value}
+                    </p>
                     <p class="mt-4 text-sm text-gray-600 md:text-base">{item.description}</p>
                 </article>
             ))}
