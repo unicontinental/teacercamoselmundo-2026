@@ -39,7 +39,23 @@ import { Icon } from "astro-icon/components";
       class="fixed bottom-4 right-4 z-20 md:w-42 h-auto w-24 drop-shadow-lg"
       aria-label="WhatsApp"
     >
-      <Icon name="wsp" class="h-full w-full" aria-hidden="true" />
+      <Icon name="wsp" class="h-full w-full wsp-pulse" aria-hidden="true" />
     </a>
   </body>
 </html>
+<style>
+  .wsp-pulse {
+    transform-origin: center;
+    animation: wsp-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes wsp-pulse {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.08);
+    }
+  }
+</style>

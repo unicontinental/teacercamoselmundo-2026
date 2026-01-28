@@ -4,6 +4,7 @@ import ArrowIcon from "./ui/arrowicon.astro";
 
 interface Item {
 	image: ImageMetadata;
+	flag?: ImageMetadata | string;
 	title: string;
 	paragraph: string;
 }
@@ -69,6 +70,14 @@ const paragraphAlignClass = paragraphAlign === "center" ? "text-center" : "text-
 						<div class="absolute inset-0 text-black z-10">
 							<div class="text-white absolute inset-x-0 bottom-0 m-2 md:m-3 md:mr-24 p-3 md:py-3 md:px-6 md:opacity-0 group-hover/article:opacity-100 group-focus-within/article:opacity-100 md:translate-y-2 group-hover/article:translate-y-0 group-focus-within/article:translate-y-0 transition duration-200 ease-[cubic-bezier(.5,.85,.25,1.8)] group-hover/article:delay-300 group-focus-within/article:delay-300 rounded-lg">
 								<div class="flex items-end gap-2">
+									{item.flag && (
+										<img
+											src={typeof item.flag === "string" ? item.flag : item.flag.src}
+											alt={`${item.title} flag`}
+											class="h-5 w-7 object-cover rounded-[2px] shadow-sm"
+											loading="lazy"
+										/>
+									)}
 									<h3 class="text-xl md:text-xl">{item.title}</h3>
 								</div>
 								<span class="text-sm md:text-base font-bold">{item.paragraph}</span>

@@ -12,6 +12,9 @@ import pontificiaChile from "../../assets/pontificia-chile.png";
 import saopauloBrasil from "../../assets/saopaulo-brasil.png";
 import estadualBrasil from "../../assets/estadual-brasil.png";
 import tecMonterrey from "../../assets/tec-mexico.png";
+import flagChile from "../../assets/icons/cl.svg";
+import flagBrasil from "../../assets/icons/br.svg";
+import flagMexico from "../../assets/icons/mx.svg";
 import Cie from "../../components/Cie.astro";
 ---
 
@@ -55,22 +58,26 @@ import Cie from "../../components/Cie.astro";
 		items={[
 			{
 				image: pontificiaChile,
-				title: "🇨🇱 Chile",
+				flag: flagChile,
+				title: "Chile",
 				paragraph: "Pontificia Universidad Católica de Chile",
 			},
 			{
 				image: saopauloBrasil,
-				title: "🇧🇷 Brasil",
+				flag: flagBrasil,
+				title: "Brasil",
 				paragraph: "Universida de São Paulo",
 			},
 			{
 				image: estadualBrasil,
-				title: "🇧🇷 Brasil",
+				flag: flagBrasil,
+				title: "Brasil",
 				paragraph: "Universidad Estadual de Campinas",
 			},
 			{
 				image: tecMonterrey,
-				title: "🇲🇽 México",
+				flag: flagMexico,
+				title: "México",
 				paragraph: "TEC de Monterrey",
 			},
 		]}
