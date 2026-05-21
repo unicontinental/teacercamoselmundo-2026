@@ -1,43 +1,59 @@
 ---
 import { Image } from "astro:assets";
-import experiencias from "../assets/experiencias.png";
-import ruta from "../assets/ruta.png";
+import acercaAlMundo from "../assets/acerca-al-mundo.webp";
+import rutaInternacional from "../assets/ruta-internacional.webp";
+import cursos from "../assets/cursos.webp";
 ---
 <section class="bg-white">
     <div class="max-w-7xl mx-auto px-4 md:px-5 py-16 md:py-20">
         <h2 class="font-wideBold text-2xl md:text-5xl mb-6 md:mb-15 md:whitespace-pre-line text-center uppercase leading-tight md:leading-18">¿Qué futuro internacional
         eliges hoy?</h2>
 
-        <div class="grid grid-cols-1 md:grid-cols-1 md:gap-0 gap-4">
-            <!-- <div class="flex-col items-center justify-center max-w-80 mx-auto hidden">
-                <a href="/experiencias-globales" class="block">
+        <div class="grid grid-cols-1 md:grid-cols-3 md:gap-0 gap-4">
+            <div class="flex flex-col items-center justify-center max-w-80 mx-auto">
+                <a href="/experiencias-globales" class="block group">
                     <Image
-                        src={experiencias}
-                        alt="Experiencias Globales"
+                        src={acercaAlMundo}
+                        alt="Contenido que te acerca al mundo"
                         width={320}
                         height={320}
-                        class={'mb-7 grayscale hover:grayscale-0 transition duration-300 cursor-pointer'}
+                        class={'mb-7 cursor-pointer'}
                     />
+                    <div class="bg-black group-hover:bg-purpura font-wideBold w-full text-white text-center py-2 md:text-2xl whitespace-pre-line uppercase mb-5">Contenido que te
+                        acerca al mundo</div>
+                    <p class="text-center text-base md:text-lg leading-relaxed">
+                        Videos con herramientas y experiencias para potenciar tu CV, aprender idiomas y prepararte para oportunidades internacionales.
+                    </p>
                 </a>
-                <div class="bg-purpura font-wideBold w-full text-white text-center py-2 md:text-2xl whitespace-pre-line uppercase mb-5">Experiencias
-                    Globales</div>
-                <p class="text-center text-base md:text-lg leading-relaxed">
-                    Conoce las historias de estudiantes que vivieron una experiencia internacional de aprendizaje.
-                </p>
-            </div> -->
+            </div>
             <div class="flex flex-col items-center justify-center max-w-80 mx-auto">
                 <a href="/ruta-internacional" class="block group">
                     <Image
-                        src={ruta}
-                        alt="Ruta Internacional UC"
+                        src={rutaInternacional}
+                        alt="Ruta Internacional"
                         width={320}
                         height={320}
                         class={'mb-7 cursor-pointer'}
                     />
                     <div class="bg-black group-hover:bg-purpura font-wideBold w-full text-white text-center py-2 md:text-2xl whitespace-pre-line uppercase mb-5">Ruta
-                        Internacional UC</div>
+                        Internacional</div>
                     <p class="text-center text-base md:text-lg leading-relaxed">
-                        Expande tu mundo académico, cultural y profesional a través de nuestra propuesta académica
+                        Explora convenios globales, universidades y destinos que te acercan a nuevas experiencias académicas y oportunidades alrededor del mundo.
+                    </p>
+                </a>
+            </div>
+            <div class="flex flex-col items-center justify-center max-w-80 mx-auto">
+                <a href="/cursos" class="block group">
+                    <Image
+                        src={cursos}
+                        alt="Cursos Libres"
+                        width={320}
+                        height={320}
+                        class={'mb-7 cursor-pointer'}
+                    />
+                    <div class="bg-black group-hover:bg-purpura font-wideBold w-full text-white text-center py-2 md:text-2xl whitespace-pre-line uppercase mb-5">Cursos Libres</div>
+                    <p class="text-center text-base md:text-lg leading-relaxed">
+                        Accede gratuitamente a cursos sobre tendencias actuales y desarrolla habilidades para fortalecer tu perfil profesional y futuro laboral.
                     </p>
                 </a>
             </div>

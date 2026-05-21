@@ -1,0 +1,48 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import SectionTitle from "../../components/SectionTitle.astro";
+import CursosGrid from "../../components/CursosGrid.astro";
+import desarrolloWebs from "../../assets/desarrollo-webs.png";
+import liderarEmprendimiento from "../../assets/liderar-emprendimiento.png";
+import negociosInnovadoras from "../../assets/negocios-innovadoras.png";
+
+const description =
+    "Domina el arte del liderazgo emprendedor con nuestro curso práctico. Descubre estrategias clave en tres módulos: Círculo Dorado, Modelo de Negocios y Lean Canvas.";
+
+const cursos = [
+    {
+        id: 1,
+        title: 'Taller I: "Desarrollo de Páginas Web"',
+        description,
+        category: "Tecnología",
+        badge: "Certificado profesional",
+        href: "#",
+        image: desarrolloWebs.src,
+    },
+    {
+        id: 2,
+        title: "¿Cómo liderar mi emprendimiento?",
+        description,
+        category: "Liderazgo",
+        badge: "Certificado profesional",
+        href: "#",
+        image: liderarEmprendimiento.src,
+    },
+    {
+        id: 3,
+        title: "Ideas de negocios innovadoras",
+        description,
+        category: "Negocios",
+        badge: "Certificado profesional",
+        href: "#",
+        image: negociosInnovadoras.src,
+    },
+];
+
+const categories = [...new Set(cursos.map((c) => c.category))];
+---
+
+<Layout>
+    <SectionTitle title="Cursos libres para construir tu futuro internacional" />
+    <CursosGrid items={cursos} categories={categories} />
+</Layout>
