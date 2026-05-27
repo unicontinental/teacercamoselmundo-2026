@@ -1,0 +1,610 @@
+---
+import "../styles/tailwind.css";
+import { Icon } from "astro-icon/components";
+
+// Texto de requisitos de ejemplo (tomado del diseño). Edita por universidad.
+const REQ =
+    "Promedio mayor o igual a 12, haber terminado el 4° ciclo, historial académico, documento de identidad/pasaporte, no contar con deuda en la UC.";
+
+const uni = (name: string, extra: Record<string, unknown> = {}) => ({
+    name,
+    modalidad: "Presencial y A distancia",
+    requisitos: REQ,
+    fechaLimite: "19 de julio",
+    vacantes: 10,
+    link: "/ruta-internacional/",
+    ...extra,
+});
+
+// Países con convenios. `photo` queda vacío (placeholder con degradado);
+// ponle la ruta de una imagen para mostrar la foto del país en el panel.
+const countries = [
+    {
+        code: "pe",
+        name: "Perú",
+        lat: -9.2,
+        lng: -75,
+        photo: "",
+        programs: "Sede principal",
+        cities: ["Huancayo", "Lima", "Arequipa"],
+        universities: [uni("Universidad Continental")],
+    },
+    {
+        code: "cl",
+        name: "Chile",
+        lat: -35,
+        lng: -71,
+        photo: "",
+        programs: "Pasantías",
+        cities: ["Santiago"],
+        universities: [uni("Pontificia Universidad Católica de Chile")],
+    },
+    {
+        code: "br",
+        name: "Brasil",
+        lat: -12,
+        lng: -50,
+        photo: "",
+        programs: "Pasantías",
+        cities: ["São Paulo", "Campinas"],
+        universities: [
+            uni("Universidad de São Paulo"),
+            uni("Universidad Estadual de Campinas (UNICAMP)"),
+        ],
+    },
+    {
+        code: "mx",
+        name: "México",
+        lat: 23,
+        lng: -102,
+        photo: "",
+        programs: "Doble titulación",
+        cities: ["Monterrey"],
+        universities: [uni("TEC de Monterrey")],
+    },
+    {
+        code: "co",
+        name: "Colombia",
+        lat: 4,
+        lng: -73,
+        photo: "",
+        programs: "Pasantías",
+        cities: ["Bogotá"],
+        universities: [uni("Universidad de los Andes")],
+    },
+    {
+        code: "ar",
+        name: "Argentina",
+        lat: -36,
+        lng: -64,
+        photo: "",
+        programs: "Pasantías",
+        cities: ["Buenos Aires"],
+        universities: [uni("Universidad de Buenos Aires")],
+    },
+    {
+        code: "uy",
+        name: "Uruguay",
+        lat: -33,
+        lng: -56,
+        photo: "",
+        programs: "Pasantías",
+        cities: ["Montevideo"],
+        universities: [uni("Universidad de la República")],
+    },
+    {
+        code: "us",
+        name: "Estados Unidos",
+        lat: 39,
+        lng: -98,
+        photo: "",
+        programs: "Doble titulación",
+        cities: ["Miami", "Phoenix"],
+        universities: [
+            uni("Florida International University"),
+            uni("Arizona State University"),
+        ],
+    },
+    {
+        code: "es",
+        name: "España",
+        lat: 40,
+        lng: -3.7,
+        photo: "",
+        programs: "Doble titulación",
+        cities: ["Madrid", "Barcelona"],
+        universities: [
+            uni("Universidad Complutense de Madrid"),
+            uni("Universidad de Barcelona"),
+        ],
+    },
+    {
+        code: "de",
+        name: "Alemania",
+        lat: 51,
+        lng: 10,
+        photo: "",
+        programs: "Intercambio",
+        cities: ["Múnich"],
+        universities: [uni("Technische Universität München")],
+    },
+    {
+        code: "za",
+        name: "Sudáfrica",
+        lat: -29,
+        lng: 24,
+        photo: "",
+        programs: "Intercambio",
+        cities: ["Ciudad del Cabo"],
+        universities: [uni("University of Cape Town")],
+    },
+];
+
+const note =
+    "Haz clic en los marcadores del globo para explorar nuestras instituciones asociadas por país.";
+const waLink =
+    "https://wa.me/51971115546?text=%C2%A1Hola!%20Quiero%20informaci%C3%B3n%20sobre%20los%20convenios%20internacionales%20de%20la%20Universidad%20Continental.";
+---
+
+<!doctype html>
+<html lang="es" class="scroll-smooth">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="icon" type="image/png" href="/favicon.png" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="generator" content={Astro.generator} />
+        <title>Convenios Internacionales | Te Acercamos el Mundo</title>
+        <meta
+            name="description"
+            content="Explora en un globo interactivo las universidades e instituciones asociadas a la Universidad Continental alrededor del mundo."
+        />
+    </head>
+    <body class="bg-black text-white overflow-hidden">
+        <main
+            class="relative h-dvh w-full overflow-hidden bg-black"
+            x-data="{
+                open: false,
+                country: { universities: [], cities: [] },
+                openUni: 0,
+                show(c) { this.country = c; this.openUni = 0; this.open = true; },
+                close() { this.open = false; },
+            }"
+            @open-country.window="show($event.detail)"
+            @keydown.escape.window="close()"
+        >
+            <!-- Halo de brillo detrás del globo -->
+            <div
+                class="pointer-events-none absolute inset-0 z-0 lg:left-auto lg:right-0 lg:w-[68%]"
+                style="background: radial-gradient(circle at center, rgba(104,2,193,0.35) 0%, rgba(80,10,178,0.12) 38%, transparent 65%);"
+            >
+            </div>
+
+            <!-- Globo -->
+            <div
+                id="globeViz"
+                class="absolute inset-0 z-0 lg:left-auto lg:right-0 lg:w-[68%]"
+            >
+            </div>
+
+            <!-- Degradado para legibilidad del texto a la izquierda -->
+            <div
+                class="pointer-events-none absolute inset-0 z-10 bg-linear-to-r from-black via-black/70 to-transparent lg:via-black/40 lg:to-transparent"
+            >
+            </div>
+
+            <!-- Logo -->
+            <a
+                href="/"
+                aria-label="Inicio"
+                class="absolute left-6 top-6 z-30 md:left-10 md:top-8"
+            >
+                <Icon name="logo" class="h-auto w-44 text-white md:w-56" />
+            </a>
+
+            <!-- Nota superior derecha -->
+            <div
+                class="absolute right-6 top-20 z-30 flex max-w-72 items-start gap-2 text-right md:right-10 md:top-10"
+            >
+                <p class="text-sm leading-snug text-[#dab2ff]/90">
+                    <span class="mr-1">💡</span>{note}
+                </p>
+            </div>
+
+            <!-- Encabezado -->
+            <div
+                class="absolute left-6 top-1/2 z-20 max-w-xl -translate-y-1/2 md:left-10"
+            >
+                <h1
+                    class="text-5xl font-bold uppercase leading-[1.05] tracking-tight md:text-7xl"
+                >
+                    Convenios<br />Internacionales
+                </h1>
+                <p class="mt-4 text-lg text-[#dab2ff] md:text-xl">
+                    Explora oportunidades globales de educación
+                </p>
+            </div>
+
+            <!-- CTA Inscripciones -->
+            <a
+                href={waLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="absolute bottom-6 right-6 z-30 flex flex-col items-center rounded-2xl bg-purpura px-6 py-3 text-center shadow-lg shadow-purpura/40 transition-transform duration-200 hover:scale-105 md:bottom-10 md:right-10"
+            >
+                <span class="text-sm font-bold uppercase tracking-wide">
+                    ¡Inscripciones abiertas!
+                </span>
+                <span class="text-xs text-white/80">Haz clic aquí</span>
+            </a>
+
+            <!-- Panel lateral del país -->
+            <div
+                x-show="open"
+                x-cloak
+                class="fixed inset-0 z-50"
+                role="dialog"
+                aria-modal="true"
+            >
+                <!-- Backdrop -->
+                <div
+                    x-show="open"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                    class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                    @click="close()"
+                >
+                </div>
+
+                <!-- Panel -->
+                <div
+                    x-show="open"
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="translate-x-full"
+                    x-transition:enter-end="translate-x-0"
+                    x-transition:leave="transition ease-in duration-250"
+                    x-transition:leave-start="translate-x-0"
+                    x-transition:leave-end="translate-x-full"
+                    class="absolute right-0 top-0 flex h-full w-full flex-col overflow-y-auto bg-morado-oscuro md:w-[62%] lg:w-[55%]"
+                >
+                    <!-- Hero del país -->
+                    <div class="relative h-56 shrink-0 overflow-hidden">
+                        <div
+                            class="absolute inset-0 bg-cover bg-center"
+                            :style="'background-image:' + (country.photo ? 'url(' + country.photo + ')' : 'linear-gradient(135deg,#42009f,#10021d)')"
+                        >
+                        </div>
+                        <div
+                            class="absolute inset-0 bg-linear-to-t from-morado-oscuro via-morado-oscuro/40 to-transparent"
+                        >
+                        </div>
+
+                        <button
+                            type="button"
+                            class="absolute right-5 top-5 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-purpura text-white transition-colors hover:bg-morado"
+                            @click="close()"
+                            aria-label="Cerrar"
+                        >
+                            <svg
+                                class="h-5 w-5"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M6 6l12 12M18 6l-12 12"></path>
+                            </svg>
+                        </button>
+
+                        <div class="absolute inset-x-0 bottom-0 p-6">
+                            <div class="mb-2 flex items-center gap-3">
+                                <img
+                                    :src="`https://flagcdn.com/w80/${country.code}.png`"
+                                    :alt="country.name"
+                                    class="h-8 w-auto rounded shadow-md"
+                                />
+                                <h2
+                                    class="text-3xl font-bold uppercase tracking-wide"
+                                    x-text="country.name"></h2>
+                            </div>
+                            <div
+                                class="flex flex-wrap gap-x-6 gap-y-1 text-xs text-white/80"
+                            >
+                                <span>
+                                    <span class="text-[#dab2ff]"
+                                        >Programas disponibles:</span
+                                    >
+                                    <span x-text="country.programs"></span>
+                                </span>
+                                <span>
+                                    <span class="text-[#dab2ff]"
+                                        >Instituciones aliadas:</span
+                                    >
+                                    <span x-text="country.universities.length"></span>
+                                </span>
+                                <span>
+                                    <span class="text-[#dab2ff]">Ciudades:</span>
+                                    <span x-text="country.cities.join(', ')"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Acordeón de universidades -->
+                    <div class="flex-1 px-6 py-2">
+                        <template
+                            x-for="(u, i) in country.universities"
+                            :key="i"
+                        >
+                            <div class="border-b border-white/10">
+                                <button
+                                    type="button"
+                                    class="flex w-full cursor-pointer items-center justify-between gap-4 py-5 text-left"
+                                    @click="openUni = openUni === i ? -1 : i"
+                                >
+                                    <span
+                                        class="font-semibold"
+                                        x-text="u.name"></span>
+                                    <svg
+                                        class="h-5 w-5 shrink-0 text-white/60 transition-transform duration-200"
+                                        :class="openUni === i ? 'rotate-180' : ''"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M6 9l6 6 6-6"></path>
+                                    </svg>
+                                </button>
+                                <div
+                                    x-show="openUni === i"
+                                    x-collapse.duration.250ms
+                                    class="pb-6 text-sm leading-relaxed text-white/80"
+                                >
+                                    <p class="mb-1">
+                                        <span class="font-semibold text-white"
+                                            >Modalidad:</span
+                                        >
+                                        <span x-text="u.modalidad"></span>
+                                    </p>
+                                    <p class="mb-1">
+                                        <span class="font-semibold text-white"
+                                            >Requisitos generales:</span
+                                        >
+                                        <span x-text="u.requisitos"></span>
+                                    </p>
+                                    <p class="mb-1">
+                                        <span class="font-semibold text-white"
+                                            >Fecha límite de postulación:</span
+                                        >
+                                        <span x-text="u.fechaLimite"></span>
+                                    </p>
+                                    <p class="mb-3">
+                                        <span class="font-semibold text-white"
+                                            >Vacantes:</span
+                                        >
+                                        <span x-text="u.vacantes"></span>
+                                    </p>
+                                    <a
+                                        :href="u.link"
+                                        class="inline-flex items-center gap-1 font-semibold text-purpura hover:text-[#dab2ff]"
+                                    >
+                                        Más información
+                                        <svg
+                                            class="h-4 w-4"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="2"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M7 17L17 7M17 7H8M17 7v9"></path>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <script
+            type="application/json"
+            id="mapData"
+            set:html={JSON.stringify({ countries })}
+        />
+
+        <script>
+            import Globe from "globe.gl";
+            import * as THREE from "three";
+
+            async function initGlobe() {
+                const el = document.getElementById("globeViz");
+                const dataEl = document.getElementById("mapData");
+                if (!el || !dataEl) return;
+
+                const { countries } = JSON.parse(dataEl.textContent || "{}");
+
+                const countriesGeo = await fetch("/data/countries.geojson").then(
+                    (r) => r.json()
+                );
+
+                // Conexiones que nacen desde la sede (Perú) hacia cada bandera
+                const hub =
+                    countries.find((c: any) => c.code === "pe") || countries[0];
+                const connectionArcs = countries
+                    .filter((c: any) => c !== hub)
+                    .map((c: any) => ({
+                        startLat: hub.lat,
+                        startLng: hub.lng,
+                        endLat: c.lat,
+                        endLng: c.lng,
+                    }));
+
+                const globe = new Globe(el, { animateIn: true })
+                    .backgroundColor("rgba(0,0,0,0)")
+                    .showAtmosphere(true)
+                    .atmosphereColor("#7c3aed")
+                    .atmosphereAltitude(0.25)
+                    // Textura real de la Tierra + relieve (bump)
+                    .globeImageUrl("/textures/earth-day.jpg")
+                    .bumpImageUrl("/textures/earth-bump.jpg")
+                    // Fronteras de países como líneas moradas
+                    .polygonsData(countriesGeo.features)
+                    .polygonCapColor(() => "rgba(0,0,0,0)")
+                    .polygonSideColor(() => "rgba(0,0,0,0)")
+                    .polygonStrokeColor(() => "rgba(216,180,254,0.55)")
+                    .polygonAltitude(0.006)
+                    // Punto brillante en cada país (bajo su bandera)
+                    .pointsData(countries)
+                    .pointLat((d: any) => d.lat)
+                    .pointLng((d: any) => d.lng)
+                    .pointColor(() => "#e9d5ff")
+                    .pointAltitude(0.004)
+                    .pointRadius(0.28)
+                    .pointResolution(8)
+                    // Arcos animados que salen de las banderas
+                    .arcsData(connectionArcs)
+                    .arcColor(() => [
+                        "rgba(124,58,237,0.15)",
+                        "rgba(233,213,255,0.95)",
+                    ])
+                    .arcStroke(0.5)
+                    .arcAltitudeAutoScale(0.4)
+                    .arcDashLength(0.5)
+                    .arcDashGap(0.25)
+                    .arcDashAnimateTime(3000)
+                    // Banderas clicables
+                    .htmlElementsData(countries)
+                    .htmlLat((d: any) => d.lat)
+                    .htmlLng((d: any) => d.lng)
+                    .htmlAltitude(0.02)
+                    .htmlElement((d: any) => {
+                        const wrap = document.createElement("div");
+                        wrap.className = "globe-marker";
+                        wrap.innerHTML = `
+                            <span class="globe-marker__ring"></span>
+                            <img src="https://flagcdn.com/w80/${d.code}.png" alt="${d.name}" />
+                        `;
+                        wrap.style.pointerEvents = "auto";
+                        wrap.style.cursor = "pointer";
+                        wrap.addEventListener("click", () => {
+                            window.dispatchEvent(
+                                new CustomEvent("open-country", { detail: d })
+                            );
+                        });
+                        return wrap;
+                    });
+
+                // Globo: textura real con relieve, remapeada a un duotono morado
+                const mat = globe.globeMaterial() as THREE.MeshPhongMaterial;
+                mat.color = new THREE.Color("#ffffff");
+                mat.emissive = new THREE.Color("#160428");
+                mat.emissiveIntensity = 0.6;
+                mat.bumpScale = 12;
+                mat.specular = new THREE.Color("#3a1d6e");
+                mat.shininess = 8;
+                // Duotono: luminancia de la textura -> paleta morada (océano oscuro -> tierra)
+                mat.onBeforeCompile = (shader) => {
+                    shader.fragmentShader = shader.fragmentShader.replace(
+                        "#include <map_fragment>",
+                        `#include <map_fragment>
+                        float lum = dot(diffuseColor.rgb, vec3(0.299, 0.587, 0.114));
+                        vec3 oceano = vec3(0.04, 0.01, 0.09);
+                        vec3 tierra = vec3(0.36, 0.18, 0.60);
+                        diffuseColor.rgb = mix(oceano, tierra, pow(clamp(lum, 0.0, 1.0), 0.85));`
+                    );
+                };
+                mat.needsUpdate = true;
+
+                // Lámina morada translúcida sobre la textura (look más acorde a la marca)
+                const R = globe.getGlobeRadius();
+                const film = new THREE.Mesh(
+                    new THREE.SphereGeometry(R * 1.003, 75, 75),
+                    new THREE.MeshBasicMaterial({
+                        color: new THREE.Color("#2a0a4d"),
+                        transparent: true,
+                        opacity: 0.5,
+                        depthWrite: false,
+                    })
+                );
+                globe.scene().add(film);
+
+                // Controles: auto-rotación + arrastre, sin zoom
+                const controls = globe.controls();
+                controls.autoRotate = true;
+                controls.autoRotateSpeed = 0.5;
+                controls.enableZoom = false;
+                controls.enablePan = false;
+                controls.addEventListener("start", () => (controls.autoRotate = false));
+                controls.addEventListener("end", () => (controls.autoRotate = true));
+
+                // Vista inicial centrada en las Américas
+                globe.pointOfView({ lat: -5, lng: -70, altitude: 1.9 }, 0);
+
+                const resize = () => {
+                    globe.width(el.clientWidth).height(el.clientHeight);
+                };
+                resize();
+                window.addEventListener("resize", resize);
+            }
+
+            initGlobe();
+        </script>
+
+        <style is:global>
+            [x-cloak] {
+                display: none !important;
+            }
+
+            .globe-marker {
+                position: relative;
+                width: 34px;
+                height: 34px;
+                transform: translate(-50%, -50%);
+            }
+            .globe-marker img {
+                display: block;
+                width: 100%;
+                height: 100%;
+                border-radius: 9999px;
+                object-fit: cover;
+                border: 2px solid rgba(233, 213, 255, 0.95);
+                box-shadow: 0 0 10px rgba(124, 58, 237, 0.85);
+                transition: transform 0.2s ease;
+            }
+            .globe-marker:hover img {
+                transform: scale(1.2);
+            }
+            .globe-marker__ring {
+                position: absolute;
+                inset: -5px;
+                border-radius: 9999px;
+                border: 2px solid rgba(216, 180, 254, 0.6);
+                animation: marker-pulse 2.2s ease-out infinite;
+            }
+            @keyframes marker-pulse {
+                0% {
+                    transform: scale(0.6);
+                    opacity: 0.9;
+                }
+                100% {
+                    transform: scale(1.7);
+                    opacity: 0;
+                }
+            }
+        </style>
+    </body>
+</html>
