@@ -13,6 +13,10 @@ canvas{
     drop-shadow(0 0 90px rgba(255,47,208,.35));
 }
 
+#globe-canvas {
+  opacity: 0;
+}
+
 :root {
   --c-deep:    #020006;
   --c-purple:  #9922ee;
@@ -43,6 +47,7 @@ html, body {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
   z-index: 1;
+  touch-action: none;
 }
 
 #lines-svg {
@@ -55,59 +60,78 @@ html, body {
 
 #overlay { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
 
+/* Intro animation initial states — driven by GSAP in main.js */
+#left-hero,
+#hint-panel,
+#inscripciones-card,
+#footer-nav {
+  opacity: 0;
+}
+
 /* ── Flag nodes (circular flag images on globe surface) ─────────────────────── */
 
 #flag-nodes { position: absolute; inset: 0; pointer-events: none; }
 
 .flag-node {
   position: absolute;
-  width: 28px; height: 28px;
+  width: 53px; height: 53px;
   border-radius: 50%;
   overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, 0.85);
-  box-shadow:
-    0 0 8px 3px rgba(220, 80, 255, 0.90),
-    0 0 18px 5px rgba(180, 40, 220, 0.55);
+  border: 2px solid rgba(180, 60, 255, 0.85);
+  padding: 2px;
+  background: transparent;
+  box-shadow: none;
   transform: translate(-50%, -50%);
   pointer-events: auto;
   cursor: pointer;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-  background: #0d0020;
+  transition: transform 0.25s ease, border-color 0.25s ease;
   z-index: 2;
 }
 
 .flag-node:hover {
-  box-shadow:
-    0 0 14px 4px rgba(240, 100, 255, 1.00),
-    0 0 28px 7px rgba(200, 60, 240, 0.75);
-  transform: translate(-50%, -50%) scale(1.3);
+  border-color: rgba(240, 100, 255, 1);
+  transform: translate(-50%, -50%) scale(1.22);
+  box-shadow: 0 0 0 3px rgba(200, 60, 255, 0.35), 0 0 18px rgba(200, 60, 255, 0.60);
 }
 
 .flag-node img {
   width: 100%; height: 100%;
   object-fit: cover;
   display: block;
+  border-radius: 50%;
 }
 
-/* Pulse rings — two siblings per flag, staggered for double-ring effect */
+/* Pulse rings — ocultas: banderas planas sin animación */
 .flag-pulse {
-  position: absolute;
-  width: 28px; height: 28px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(200, 60, 255, 0.85);
-  background: rgba(160, 30, 220, 0.18);
-  pointer-events: none;
-  transform: translate(-50%, -50%);
-  animation: flag-pulse 2.4s ease-out infinite;
-  z-index: 1;
-}
-.flag-pulse.delay {
-  animation-delay: 1.2s;
+  display: none;
 }
 
 @keyframes flag-pulse {
   0%   { transform: translate(-50%,-50%) scale(1);   opacity: 0.85; }
   100% { transform: translate(-50%,-50%) scale(2.6); opacity: 0;    }
+}
+
+/* ── Flag connector: dot + label ─────────────────────────────────────────────── */
+
+.flag-dot {
+  position: absolute;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: rgba(200, 70, 255, 0.90);
+  border: 1px solid rgba(220, 120, 255, 0.70);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.flag-label {
+  display: none;
+}
+
+.flag-connector-line {
+  stroke: rgba(180, 60, 255, 0.70);
+  stroke-width: 1;
+  fill: none;
 }
 
 /* ── University label cards ─────────────────────────────────────────────────── */
@@ -260,12 +284,8 @@ html, body {
 .lh-subtitle {
   font-family: 'Inter', sans-serif;
   font-size: 18px;
-  color: rgba(255, 248, 255, 1);
-  text-shadow:
-    0 0 6px rgba(255, 255, 255, 0.85),
-    0 0 14px rgba(210, 160, 255, 0.75),
-    0 0 28px rgba(180, 90, 255, 0.55),
-    0 0 50px rgba(140, 60, 255, 0.30);
+  color: #FFFFFF;
+
   font-weight: 500;
   letter-spacing: 0.025em;
   margin: 0;
@@ -529,7 +549,7 @@ html, body {
   position: fixed;
   top: 0;
   right: 0;
-  width: clamp(300px, 28vw, 560px);
+  width: 40vw;
   height: 100vh;
   background: #08031a;
   border-left: 1px solid rgba(160, 80, 255, 0.35);
@@ -737,7 +757,7 @@ html, body {
   overflow: hidden;
   transition: max-height 0.35s ease;
 }
-.acc-item.open .acc-body { max-height: 500px; }
+.acc-item.open .acc-body { max-height: 760px; }
 
 .acc-content {
   padding: 14px 18px 18px;
@@ -793,6 +813,19 @@ html, body {
   border: 1px solid rgba(255,160,50,0.32);
 }
 
+.acc-link {
+  font-size: 12px;
+  color: rgba(180, 120, 255, 0.90);
+  text-decoration: none;
+  line-height: 1.45;
+  word-break: break-all;
+  transition: color 0.2s;
+}
+.acc-link:hover {
+  color: #ee88ff;
+  text-decoration: underline;
+}
+
 .acc-btn {
   margin-top: 6px;
   padding: 11px 0;
@@ -806,6 +839,9 @@ html, body {
   width: 150px;
   transition: opacity 0.2s, transform 0.15s;
   box-shadow: 0 4px 20px rgba(140,40,255,0.40);
+  display: block;
+  text-align: center;
+  text-decoration: none;
 }
 .acc-btn:hover { opacity: 0.88; transform: translateY(-1px); }
 
@@ -934,6 +970,81 @@ html, body {
 }
 .fn-btn:active { transform: scale(0.96); }
 
+/* ── Separador vertical dentro del footer-nav ─────────────────────────────── */
+.fn-sep {
+  width: 1px;
+  height: 20px;
+  background: rgba(160, 80, 255, 0.28);
+  flex-shrink: 0;
+}
+
+/* ── Botón Play / Pause del globo ─────────────────────────────────────────── */
+.fn-globe-toggle {
+  background: linear-gradient(145deg, #2a0c6e 0%, #170840 100%);
+  box-shadow:
+    0 0 0 1px rgba(140, 60, 240, 0.40),
+    inset 0 1px 0 rgba(200, 130, 255, 0.14),
+    0 4px 16px rgba(100, 30, 200, 0.40);
+  font-size: 15px;
+  color: rgba(210, 170, 255, 0.80);
+  transition: background 0.22s, box-shadow 0.22s, transform 0.15s, color 0.22s;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.fn-globe-toggle svg {
+  width: 15px; height: 15px;
+  display: block;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s ease;
+}
+
+/* Estado activo: globo rotando — anillo púrpura pulsante */
+.fn-globe-toggle.is-playing {
+  color: rgba(230, 180, 255, 0.95);
+  box-shadow:
+    0 0 0 1px rgba(180, 80, 255, 0.65),
+    0 0 12px rgba(160, 50, 255, 0.45),
+    inset 0 1px 0 rgba(220, 160, 255, 0.22),
+    0 4px 20px rgba(130, 40, 255, 0.50);
+  animation: globe-btn-pulse 2.8s ease-in-out infinite;
+}
+
+@keyframes globe-btn-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 1px rgba(180, 80, 255, 0.65),
+      0 0 12px rgba(160, 50, 255, 0.45),
+      inset 0 1px 0 rgba(220, 160, 255, 0.22),
+      0 4px 20px rgba(130, 40, 255, 0.50);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(210, 100, 255, 0.85),
+      0 0 22px rgba(190, 70, 255, 0.65),
+      inset 0 1px 0 rgba(230, 170, 255, 0.30),
+      0 6px 28px rgba(160, 60, 255, 0.65);
+  }
+}
+
+/* Estado pausado — sin pulso, más tenue */
+.fn-globe-toggle:not(.is-playing) {
+  color: rgba(160, 120, 220, 0.70);
+  animation: none;
+}
+
+.fn-globe-toggle:hover {
+  background: linear-gradient(145deg, #3c1898 0%, #22105a 100%);
+  color: #fff;
+  box-shadow:
+    0 0 0 1px rgba(210, 110, 255, 0.75),
+    0 0 20px rgba(190, 70, 255, 0.55),
+    inset 0 1px 0 rgba(230, 170, 255, 0.28),
+    0 6px 26px rgba(150, 50, 255, 0.60);
+  transform: scale(1.10);
+  animation: none;
+}
+
+.fn-globe-toggle:active { transform: scale(0.94); }
+
 /* ── Globe cursor when hovering interactive country ──────────────── */
 #globe-canvas.country-hover { cursor: pointer; }
 
@@ -956,16 +1067,8 @@ html, body {
     right: max(20px, calc(50vw - 940px));
   }
 
-  #footer-nav {
-        left: 55%;
-    /* ya está centrado con translateX(-50%), no necesita ajuste */
-  }
 }
-@media (min-width: 1500px) {
-  #footer-nav {
-        left: 57%;
-  }
-}
+
 
 /* ══════════════════════════════════════════════════════════════════════════════
    RESPONSIVE — TABLET LANDSCAPE / SMALL DESKTOP (≤ 1100px)
@@ -1017,13 +1120,15 @@ html, body {
   #country-panel.visible { transform: translateY(0); }
   .cp-header { height: 180px; }
 
+  /* Conector (nodo + línea) solo en desktop */
+  .flag-dot, .flag-connector-line { display: none; }
+
   /* Labels */
   .uni-label     { min-width: 110px; max-width: 155px; padding: 5px 8px 5px 5px; }
   .label-name    { font-size: 9px; }
   .label-country { font-size: 7px; }
   .label-flag    { width: 26px; height: 26px; }
-  .flag-node     { width: 22px; height: 22px; }
-  .flag-pulse    { width: 22px; height: 22px; }
+  .flag-node { width: 44px; height: 44px; }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════
@@ -1056,10 +1161,8 @@ html, body {
   /* Labels y líneas — muy saturado en móvil */
   .uni-label { display: none; }
   #lines-svg { display: none; }
-
   /* Flag nodes más pequeños */
-  .flag-node  { width: 20px; height: 20px; border-width: 1.5px; }
-  .flag-pulse { width: 20px; height: 20px; }
+  .flag-node { width: 38px; height: 38px; border-width: 2px; }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════
@@ -1088,6 +1191,5 @@ html, body {
   .ic-badge span { font-size: 10px; }
   .ic-btn        { font-size: 9px; padding: 5px 8px; }
 
-  .flag-node  { width: 18px; height: 18px; }
-  .flag-pulse { width: 18px; height: 18px; }
+  .flag-node { width: 34px; height: 34px; }
 }

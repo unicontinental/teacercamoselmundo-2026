@@ -1,8 +1,11 @@
 import * as THREE from 'three';
 import { gsap } from 'gsap';
 import { geoContains } from 'd3-geo';
+import { feature as topoFeature } from 'topojson-client';
 import { universities } from './universities.js';
 import { COUNTRIES, COUNTRY_MAP, OUR_ISO } from './countryData.js';
+import { playHoverSound, startRotationSound, stopRotationSound, playSelectSound } from './audio.js';
+import { NUMERIC_TO_ISO2 } from './isoNumeric.js';
 
 // ── Shaders ───────────────────────────────────────────────────────────────────
 
@@ -59,17 +62,22 @@ const globeFS = `
     float rim      = 1.0 - NdotV;
     float rimPow3  = pow(rim, 3.5);
     float rimPow2  = pow(rim, 2.2);
+    vec3  halfDir  = normalize(lightDir + vec3(0.0, 0.0, 1.0));
 
+    // Ocean
     vec3 ocean = deepColor;
     ocean = mix(ocean, midColor, fullDay * 0.18);
     ocean += edgeColor * rimPow3 * 0.60;
+    // Specular reflection on ocean surface (Atlantic highlight)
+    float oceanSpec = pow(max(dot(vNormal, halfDir), 0.0), 120.0) * daySide * 0.90;
+    ocean += vec3(0.50, 0.30, 0.75) * oceanSpec;
 
+    // Land
     vec3 land = mix(landDark, landColor, daySide);
     land      = mix(land, landBright, fullDay * 0.72);
     land     *= (1.0 - rimPow2 * 0.70);
-    vec3  halfDir = normalize(lightDir + vec3(0.0, 0.0, 1.0));
-    float spec    = pow(max(dot(vNormal, halfDir), 0.0), 38.0) * daySide;
-    land += vec3(0.38, 0.28, 0.52) * spec;
+    float landSpec = pow(max(dot(vNormal, halfDir), 0.0), 38.0) * daySide;
+    land += vec3(0.38, 0.28, 0.52) * landSpec;
 
     float isLand      = texture2D(landMask,      vUv).r;
     float isHighlight = texture2D(highlightMask, vUv).r;
@@ -79,6 +87,18 @@ const globeFS = `
     vec3  hlColor = vec3(0.82, 0.38, 1.0);
     color = mix(color, hlColor, hl * 0.92);
     color += hlColor * hl * 0.30;
+
+    // Side darkening – gradual vignette on lateral edges to reinforce sphere shape
+    color *= 1.0 - pow(rim, 1.8) * 0.42;
+
+    // Bottom shadow – 25% darkening on the lower hemisphere (view-space Y)
+    float bottomShadow = smoothstep(0.18, -0.52, vNormal.y) * 0.25;
+    color *= 1.0 - bottomShadow;
+
+    // Back-light – subtle purple rim on the dark terminator edge to separate from background
+    float darkEdge = pow(rim, 2.8) * smoothstep(0.08, -0.30, NdotL);
+    color += vec3(0.28, 0.04, 0.52) * darkEdge * 0.48;
+
     gl_FragColor = vec4(color, 1.0);
   }
 `;
@@ -128,7 +148,7 @@ function computeGlobeCenterX() {
   const VW = window.innerWidth;
   const { z: cz } = getResponsiveCamera();
   const worldHalfW   = cz * Math.tan(22.5 * Math.PI / 180);
-  const screenOffset = window.innerWidth >= 900 ? 200 : 0;
+  const screenOffset = (window.innerWidth >= 900 ? 200 : 0) + 10;
   return -(screenOffset * (2 * worldHalfW) / VW);
 }
 
@@ -253,15 +273,29 @@ const globeMaterial = new THREE.ShaderMaterial({
 const globeMesh = new THREE.Mesh(new THREE.SphereGeometry(GLOBE_R, 64, 64), globeMaterial);
 globeGroup.add(globeMesh);
 
-// Atmosphere
+// Atmosphere – inner halo: intense violet on the illuminated rim
 globeGroup.add(new THREE.Mesh(
-  new THREE.SphereGeometry(GLOBE_R + 0.012, 64, 64),
+  new THREE.SphereGeometry(GLOBE_R + 0.022, 64, 64),
   new THREE.ShaderMaterial({
     vertexShader: atmosphereVS, fragmentShader: atmosphereFS,
     uniforms: {
-      glowColor: { value: new THREE.Color(0xcc33ff) },
-      glowPower: { value: 2.8 },
-      opacity:   { value: 0.95 },
+      glowColor: { value: new THREE.Color(0xee55ff) },
+      glowPower: { value: 2.0 },
+      opacity:   { value: 1.50 },
+    },
+    transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.FrontSide,
+  })
+));
+
+// Atmosphere – outer halo: wider, softer violet glow for depth separation
+globeGroup.add(new THREE.Mesh(
+  new THREE.SphereGeometry(GLOBE_R + 0.10, 64, 64),
+  new THREE.ShaderMaterial({
+    vertexShader: atmosphereVS, fragmentShader: atmosphereFS,
+    uniforms: {
+      glowColor: { value: new THREE.Color(0xaa22ee) },
+      glowPower: { value: 4.8 },
+      opacity:   { value: 0.60 },
     },
     transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.FrontSide,
   })
@@ -281,10 +315,6 @@ function makeRing(inner, outer, rotX, rotZ, hexColor) {
   m.rotation.x = rotX; m.rotation.z = rotZ;
   return m;
 }
-scene.add(makeRing(GLOBE_R*1.07, GLOBE_R*1.13, Math.PI/2,   0,    0xee55ff));
-scene.add(makeRing(GLOBE_R*1.13, GLOBE_R*1.17, Math.PI/2.3, 0.25, 0xcc33ee));
-scene.add(makeRing(GLOBE_R*1.04, GLOBE_R*1.08, Math.PI/2,   0.55, 0xaa22dd));
-scene.add(makeRing(GLOBE_R*1.20, GLOBE_R*1.38, Math.PI/2,   0.08, 0x8811bb));
 
 // ── GeoJSON ───────────────────────────────────────────────────────────────────
 
@@ -293,9 +323,17 @@ let geoData    = null;
 
 function getGeoData() {
   if (!geoPromise) {
-    geoPromise = fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson')
+    geoPromise = fetch('/data/countries-50m.json')
       .then(r => r.json())
-      .then(data => { geoData = data; return data; });
+      .then(topo => {
+        const fc = topoFeature(topo, topo.objects.countries);
+        fc.features.forEach(f => {
+          f.properties = f.properties || {};
+          f.properties.ISO_A2 = NUMERIC_TO_ISO2[parseInt(f.id, 10)] || '-99';
+        });
+        geoData = fc;
+        return fc;
+      });
   }
   return geoPromise;
 }
@@ -319,7 +357,15 @@ async function loadGeoJSON(group, radius, opacity) {
       const polys = g.type==='Polygon'?[g.coordinates]:g.type==='MultiPolygon'?g.coordinates:[];
       polys.forEach(poly => poly.forEach(ring => {
         const v = ring.map(([lo,la]) => latLonToVec3(la, lo, r));
-        for (let i=0;i<v.length-1;i++) pts.push(v[i].x,v[i].y,v[i].z,v[i+1].x,v[i+1].y,v[i+1].z);
+        for (let i=0;i<v.length-1;i++) {
+          const a = v[i], b = v[i+1];
+          const steps = Math.max(1, Math.ceil(a.angleTo(b) / 0.04));
+          for (let s=0;s<steps;s++) {
+            const p0 = a.clone().lerp(b, s/steps).normalize().multiplyScalar(r);
+            const p1 = a.clone().lerp(b, (s+1)/steps).normalize().multiplyScalar(r);
+            pts.push(p0.x,p0.y,p0.z,p1.x,p1.y,p1.z);
+          }
+        }
       }));
     });
     const geo = new THREE.BufferGeometry();
@@ -328,14 +374,15 @@ async function loadGeoJSON(group, radius, opacity) {
     const mB = new THREE.LineBasicMaterial({ color:0xffd0ff, transparent:true, opacity:0, blending:THREE.AdditiveBlending, depthWrite:false });
     group.add(new THREE.LineSegments(geo, mA));
     group.add(new THREE.LineSegments(geo.clone(), mB));
-    gsap.to(mA, { opacity: opacity*0.50, duration:2.0, delay:0.8 });
-    gsap.to(mB, { opacity: opacity*0.15, duration:2.0, delay:1.0 });
+    gsap.to(mA, { opacity: opacity*0.50, duration:1.8, delay:0.4 });
+    gsap.to(mB, { opacity: opacity*0.15, duration:1.8, delay:0.6 });
   } catch(e) { console.warn('GeoJSON error', e); }
 }
+
 loadGeoJSON(globeGroup, GLOBE_R, 1.0);
 
 async function createCountryTexture() {
-  const W = 4096, H = 2048;
+  const W = 2048, H = 1024;
   const cv = document.createElement('canvas'); cv.width=W; cv.height=H;
   const ctx = cv.getContext('2d');
   ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
@@ -450,21 +497,16 @@ const countryGroups = Object.values(
 // ── Flag nodes: una por país en el centroide ──────────────────────────────────
 
 const surfaceContainer = document.getElementById('flag-nodes');
+const svg = document.getElementById('lines-svg');
 
 countryGroups.forEach(group => {
-  ['', 'delay'].forEach(mod => {
-    const p = document.createElement('div');
-    p.className = mod ? `flag-pulse ${mod}` : 'flag-pulse';
-    p.dataset.fc = group.flagCode;
-    surfaceContainer.appendChild(p);
-  });
-
+  // Flag node
   const el = document.createElement('div');
   el.className = 'flag-node';
   el.dataset.fc = group.flagCode;
 
   const img = document.createElement('img');
-  img.src = `https://flagcdn.com/40x30/${group.flagCode}.png`;
+  img.src = `https://flagcdn.com/w80/${group.flagCode}.png`;
   img.alt = group.country;
   img.onerror = () => {
     el.style.background = 'linear-gradient(135deg,#4a0095,#9930ee)';
@@ -475,112 +517,54 @@ countryGroups.forEach(group => {
   el.appendChild(img);
   surfaceContainer.appendChild(el);
 
-  el.addEventListener('mouseenter', () => setHighlight(group.flagCode, true));
+  el.addEventListener('mouseenter', () => { setHighlight(group.flagCode, true); playHoverSound(); });
   el.addEventListener('mouseleave', () => setHighlight(group.flagCode, false));
   el.addEventListener('click', () => openPanel(group.flagCode));
-});
 
-// ── University labels ─────────────────────────────────────────────────────────
+  // Connector dot
+  const dot = document.createElement('div');
+  dot.className = 'flag-dot';
+  dot.dataset.fc = group.flagCode;
+  surfaceContainer.appendChild(dot);
 
-const labelsContainer = document.getElementById('labels');
-const labelCardEls    = [];
-
-universities.forEach(uni => {
-  const el = document.createElement('div');
-  el.className = 'uni-label';
-  el.dataset.id = uni.id;
-  el.style.opacity = '0';
-  el.style.left = '-9999px';
-  el.style.top  = '-9999px';
-
-  const logoDiv = document.createElement('div');
-  logoDiv.className = 'label-logo';
-  const logoImg = document.createElement('img');
-  const domain  = (uni.logo || '').replace('https://logo.clearbit.com/', '');
-  logoImg.alt   = uni.id.toUpperCase().slice(0, 3);
-  logoImg.src   = uni.logo || '';
-  //console.log(domain);
-  logoImg.onerror = function () {
-    if (!this.dataset.tried) {
-      this.dataset.tried = '1';
-      this.src = `https://www.google.com/s2/favicons?sz=64&domain_url=https://${domain}`;
-    } else {
-      this.style.display = 'none';
-      logoDiv.classList.add('logo-fallback');
-      logoDiv.textContent = uni.id.toUpperCase().slice(0, 3);
-    }
-  };
-  logoDiv.appendChild(logoImg);
-
-  const textDiv = document.createElement('div');
-  textDiv.className = 'label-text';
-  textDiv.innerHTML = `
-    <div class="label-name">${uni.name.replace('\n','<br>')}</div>
-    <div class="label-country">${uni.country}</div>
-  `;
-
-  const inner = document.createElement('div');
-  inner.className = 'label-inner';
-  inner.appendChild(logoDiv);
-  inner.appendChild(textDiv);
-  el.appendChild(inner);
-
-  labelsContainer.appendChild(el);
-  labelCardEls.push({ el, uni });
-
-  setTimeout(() => {
-    gsap.to(el, { opacity:1, duration:0.7, ease:'power2.out' });
-  }, (1.5 + uni.labelDelay) * 1000);
-
-  el.addEventListener('mouseenter', () => setHighlight(uni.id, true));
-  el.addEventListener('mouseleave', () => setHighlight(uni.id, false));
-  el.addEventListener('click', () => openPanel(uni.flagCode));
-
-  const countryEl = textDiv.querySelector('.label-country');
-  if (countryEl) countryEl.addEventListener('click', e => { e.stopPropagation(); openPanel(uni.flagCode); });
-});
-
-// ── SVG lines ─────────────────────────────────────────────────────────────────
-
-const svg = document.getElementById('lines-svg');
-
-universities.forEach(uni => {
-  const g = document.createElementNS('http://www.w3.org/2000/svg','line');
-  g.id = `line-glow-${uni.id}`; g.setAttribute('class','connection-line-glow'); g.style.opacity = '0';
-  svg.appendChild(g);
-
-  const l = document.createElementNS('http://www.w3.org/2000/svg','line');
-  l.id = `line-${uni.id}`; l.setAttribute('class','connection-line'); l.style.opacity = '0';
-  svg.appendChild(l);
-
-  setTimeout(() => {
-    gsap.to(l, { opacity:1,    duration:0.5 });
-    gsap.to(g, { opacity:0.55, duration:0.5 });
-  }, (1.8 + uni.labelDelay) * 1000);
+  // SVG connector line
+  const svgLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  svgLine.setAttribute('data-fc', group.flagCode);
+  svgLine.setAttribute('class', 'flag-connector-line');
+  svg.appendChild(svgLine);
 });
 
 // ── Highlight (por flagCode — afecta todos los labels del país) ───────────────
 
 function setHighlight(flagCode, on) {
-  universities.filter(u => u.flagCode === flagCode).forEach(u => {
-    const card  = document.querySelector(`.uni-label[data-id="${u.id}"]`);
-    const line  = document.getElementById(`line-${u.id}`);
-    const lineG = document.getElementById(`line-glow-${u.id}`);
-    if (card)  card.style.borderColor = on ? 'rgba(220,120,255,0.9)' : '';
-    if (line)  line.style.opacity     = on ? '1' : '';
-    if (lineG) lineG.style.opacity    = on ? '0.5' : '';
-  });
   const flagEl = document.querySelector(`.flag-node[data-fc="${flagCode}"]`);
   if (flagEl) flagEl.style.transform = on ? 'translate(-50%,-50%) scale(1.25)' : 'translate(-50%,-50%)';
+  if (on) {
+    const iso = flagCodeToIso[flagCode];
+    if (iso) {
+      hoveredIso = iso;
+      drawHighlight(findGeoFeatureByIso(iso));
+      canvas.classList.add('country-hover');
+    }
+  } else {
+    drawHighlight(null);
+    canvas.classList.remove('country-hover');
+    hoveredIso = null;
+  }
 }
 
 // ── Country panel (modal) ─────────────────────────────────────────────────────
 
-let currentPanelIndex = -1;
+let currentPanelIndex  = -1;
+let isAutoRotating     = true;
+
+const SVG_PAUSE = `<svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15"><rect x="5" y="3" width="5" height="18" rx="2"/><rect x="14" y="3" width="5" height="18" rx="2"/></svg>`;
+const SVG_PLAY  = `<svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15"><polygon points="6,3 20,12 6,21"/></svg>`;
 
 const isoToFlagCode = {
-  US:'us', MX:'mx', CO:'co', PE:'pe', CL:'cl',
+  US:'us', MX:'mx', CO:'co', CL:'cl', CR:'cr', CA:'ca',
   ES:'es', DE:'de', BR:'br', AR:'ar', UY:'uy', ZA:'za', CN:'cn',
+  GT:'gt', PY:'py', NI:'ni', PT:'pt', BE:'be', EC:'ec', IT:'it',
 };
 const flagCodeToIso = Object.fromEntries(Object.entries(isoToFlagCode).map(([k,v]) => [v,k]));
 
@@ -588,10 +572,16 @@ function openPanel(flagCode) {
   const idx = COUNTRY_MAP[flagCode];
   if (idx === undefined) return;
   currentPanelIndex = idx;
+  playSelectSound();
   renderPanel(idx);
   document.getElementById('country-panel').classList.add('visible');
   document.getElementById('country-panel').setAttribute('aria-hidden', 'false');
   document.getElementById('panel-backdrop').classList.add('visible');
+  gsap.to(rotObj, { speed: 0, duration: 0.5, ease: 'power2.in' });
+  isAutoRotating = false;
+  toggleBtn.innerHTML = SVG_PLAY;
+  toggleBtn.classList.remove('is-playing');
+  toggleBtn.setAttribute('aria-label', 'Reanudar rotación');
 }
 
 function closePanel() {
@@ -602,6 +592,19 @@ function closePanel() {
   hoveredIso = null;
   drawHighlight(null);
   canvas.classList.remove('country-hover');
+  if (isAutoRotating) {
+    gsap.to(rotObj, { speed: 0.08, duration: 1.8, ease: 'power2.out' });
+  }
+}
+
+function resumeRotation() {
+  if (!isAutoRotating) {
+    isAutoRotating = true;
+    gsap.to(rotObj, { speed: 0.08, duration: 1.8, ease: 'power2.out' });
+    toggleBtn.innerHTML = SVG_PAUSE;
+    toggleBtn.classList.add('is-playing');
+    toggleBtn.setAttribute('aria-label', 'Pausar rotación');
+  }
 }
 
 function navigatePanel(delta) {
@@ -627,7 +630,7 @@ function renderAccordion(unis) {
         <div class="acc-abbr">${uni.abbr}</div>
         <div class="acc-info">
           <div class="acc-name">${uni.name}</div>
-          <div class="acc-city">${uni.city}</div>
+      
         </div>
         <div class="acc-chevron">&#8250;</div>
       </div>
@@ -637,19 +640,25 @@ function renderAccordion(unis) {
             <span class="acc-row-label">Modalidad</span>
             <span class="acc-badge ${modClass}">${modLabel}</span>
           </div>
-          <div class="acc-row">
+          ${uni.convenioType ? `<div class="acc-row">
+            <span class="acc-row-label">Tipo de convenio</span>
+            <span class="acc-row-value">${uni.convenioType}</span>
+          </div>` : ''}
+          ${uni.carrerasUC ? `<div class="acc-row">
+            <span class="acc-row-label">Carreras UC</span>
+            <span class="acc-row-value">${uni.carrerasUC}</span>
+          </div>` : ''}
+        
+          ${uni.requirements ? `<div class="acc-row">
             <span class="acc-row-label">Requisitos</span>
             <span class="acc-row-value">${uni.requirements}</span>
-          </div>
-          <div class="acc-row">
+          </div>` : ''}
+          ${uni.deadline ? `<div class="acc-row">
             <span class="acc-row-label">Fecha límite</span>
             <span class="acc-row-value">${uni.deadline}</span>
-          </div>
-          <div class="acc-row">
-            <span class="acc-row-label">Vacantes</span>
-            <span class="acc-row-value">${uni.vacancies} plazas disponibles</span>
-          </div>
-          <button class="acc-btn">Más Información</button>
+          </div>` : ''}
+         
+          <a href="${uni.website || '#'}" target="_blank" rel="noopener noreferrer" class="acc-btn">Más Información</a>
         </div>
       </div>
     `;
@@ -672,9 +681,7 @@ function renderPanel(idx) {
   document.getElementById('cp-flag').src          = `https://flagcdn.com/80x60/${country.flagCode}.png`;
   document.getElementById('cp-flag').alt          = country.name;
   document.getElementById('cp-country-name').textContent = country.name;
-  document.getElementById('cp-programs').textContent     = country.programs;
-  document.getElementById('cp-institutions').textContent = country.institutions;
-  document.getElementById('cp-cities').textContent       = country.cities;
+
 
   renderAccordion(country.universities);
 
@@ -705,6 +712,28 @@ function footerNavigate(delta) {
 document.getElementById('fn-prev').addEventListener('click', () => footerNavigate(-1));
 document.getElementById('fn-next').addEventListener('click', () => footerNavigate(1));
 
+// ── Globe play/pause toggle ───────────────────────────────────────────────────
+
+const toggleBtn = document.getElementById('globe-toggle');
+toggleBtn.innerHTML = SVG_PAUSE;
+
+toggleBtn.addEventListener('click', () => {
+  isAutoRotating = !isAutoRotating;
+  if (isAutoRotating) {
+    if (currentPanelIndex === -1) {
+      gsap.to(rotObj, { speed: 0.08, duration: 1.2, ease: 'power2.out' });
+    }
+    toggleBtn.innerHTML = SVG_PAUSE;
+    toggleBtn.classList.add('is-playing');
+    toggleBtn.setAttribute('aria-label', 'Pausar rotación');
+  } else {
+    gsap.to(rotObj, { speed: 0, duration: 0.5, ease: 'power2.in' });
+    toggleBtn.innerHTML = SVG_PLAY;
+    toggleBtn.classList.remove('is-playing');
+    toggleBtn.setAttribute('aria-label', 'Reanudar rotación');
+  }
+});
+
 // ── Label position system ─────────────────────────────────────────────────────
 
 let _gcx = 0, _gcy = 0;
@@ -723,7 +752,7 @@ function computeSafeBounds() {
 
 function getResponsivePush() {
   const w = window.innerWidth;
-  if (w < 480) return 65; if (w < 768) return 88; return 70;
+  if (w < 480) return 38; if (w < 768) return 44; return 40;
 }
 
 function getRadialDir(flagPos) {
@@ -759,11 +788,29 @@ function updatePositions() {
   _gcx = ( gc.x*0.5+0.5)*window.innerWidth;
   _gcy = (-gc.y*0.5+0.5)*window.innerHeight;
 
-  const HALF_W = 110, HALF_H = 26, GAP = 5;
-  const LABEL_STEP = 56; // espaciado vertical entre labels del mismo país
-  const SEP_HW = HALF_W + GAP;
-  // Altura total del stack para separación entre grupos
-  const SEP_HH = HALF_H + GAP;
+  // Footer nav: centrado bajo el globo en desktop, CSS en móvil
+  if (footerDynamic) {
+    if (window.innerWidth > 900) {
+      const camDist    = camera.position.length();
+      const angularR   = Math.asin(Math.min(0.999, GLOBE_R / camDist));
+      const screenR    = Math.tan(angularR) / Math.tan(camera.fov * Math.PI / 360) * (window.innerHeight / 2);
+      footerNavEl.style.left      = _gcx + 'px';
+      footerNavEl.style.top       = (_gcy + screenR + 16) + 'px';
+      footerNavEl.style.bottom    = 'auto';
+      footerNavEl.style.transform = 'translateX(-50%)';
+    } else {
+      footerNavEl.style.left      = '';
+      footerNavEl.style.top       = '';
+      footerNavEl.style.bottom    = '';
+      footerNavEl.style.transform = '';
+    }
+  }
+
+  const HALF_W    = 110, HALF_H = 26, GAP = 5;
+  const VERT_STEP  = 46;  // paso vertical entre labels del mismo país
+  const STAGGER    = 13;  // desplazamiento radial adicional por índice (escalonado)
+  const SEP_HW     = HALF_W + GAP;
+  const SEP_HH     = HALF_H + GAP;
 
   // ── Fase 1: posición de la bandera de cada país y anchor del stack ──────────
   const groups = countryGroups.map(group => {
@@ -785,9 +832,8 @@ function updatePositions() {
     for (let i = 0; i < vis.length; i++) {
       for (let j = i + 1; j < vis.length; j++) {
         const a = vis[i], b = vis[j];
-        // Zona de separación considera el stack completo de cada país
-        const aH = (a.group.n - 1) * LABEL_STEP / 2 + HALF_H;
-        const bH = (b.group.n - 1) * LABEL_STEP / 2 + HALF_H;
+        const aH = (a.group.n - 1) * VERT_STEP / 2 + HALF_H;
+        const bH = (b.group.n - 1) * VERT_STEP / 2 + HALF_H;
         const needH = aH + bH + GAP;
         const dx = Math.abs(a.ax - b.ax), dy = Math.abs(a.ay - b.ay);
         if (dx >= SEP_HW * 2 || dy >= needH * 2) continue;
@@ -803,68 +849,75 @@ function updatePositions() {
   }
 
   // ── Fase 3: aplicar posiciones ──────────────────────────────────────────────
-  groups.forEach(({ group, flagPos, show, ax, ay }) => {
-    // Bandera del país
+  groups.forEach(({ group, flagPos, show }) => {
+    const FLAG_HALF = 30; // radio del flag-node (60px / 2)
+    const PUSH      = window.innerWidth > 900 ? 52 : 8;
+    const { nx, ny } = getRadialDir(flagPos);
+
+    // Bandera: empujada radialmente hacia afuera del punto geográfico
+    const flagX = flagPos.x + nx * PUSH;
+    const flagY = flagPos.y + ny * PUSH;
     const flagEl = document.querySelector(`.flag-node[data-fc="${group.flagCode}"]`);
     if (flagEl) {
-      flagEl.style.left          = flagPos.x + 'px';
-      flagEl.style.top           = flagPos.y + 'px';
+      flagEl.style.left          = flagX + 'px';
+      flagEl.style.top           = flagY + 'px';
       flagEl.style.opacity       = show ? '1' : '0';
       flagEl.style.visibility    = show ? 'visible' : 'hidden';
       flagEl.style.pointerEvents = show ? 'auto' : 'none';
     }
-    document.querySelectorAll(`.flag-pulse[data-fc="${group.flagCode}"]`).forEach(p => {
-      p.style.left       = flagPos.x + 'px';
-      p.style.top        = flagPos.y + 'px';
-      p.style.opacity    = show ? '1' : '0';
-      p.style.visibility = show ? 'visible' : 'hidden';
-    });
 
-    // Labels apilados centrados en (ax, ay)
-    const n = group.unis.length;
-    group.unis.forEach((uni, i) => {
-      const offset = (i - (n - 1) / 2) * LABEL_STEP;
-      const lx = ax;
-      const ly = Math.max(_safeBounds.yMin + HALF_H,
-                   Math.min(_safeBounds.yMax - HALF_H, ay + offset));
+    // Nodo (dot): pegado al país en el globo
+    const dotEl = document.querySelector(`.flag-dot[data-fc="${group.flagCode}"]`);
+    if (dotEl) {
+      dotEl.style.left       = flagPos.x + 'px';
+      dotEl.style.top        = flagPos.y + 'px';
+      dotEl.style.opacity    = show ? '1' : '0';
+      dotEl.style.visibility = show ? 'visible' : 'hidden';
+    }
 
-      const labelEl = document.querySelector(`.uni-label[data-id="${uni.id}"]`);
-      if (labelEl) {
-        labelEl.style.left          = lx + 'px';
-        labelEl.style.top           = ly + 'px';
-        labelEl.style.visibility    = show ? 'visible' : 'hidden';
-        labelEl.style.pointerEvents = show ? 'auto' : 'none';
-      }
-
-      // Línea desde el borde del label hasta la bandera del país
-      const line  = document.getElementById(`line-${uni.id}`);
-      const lineG = document.getElementById(`line-glow-${uni.id}`);
-      if ((line || lineG) && labelEl) {
-        const rect = labelEl.getBoundingClientRect();
-        const ddx  = flagPos.x - (rect.left + rect.width  / 2);
-        const ddy  = flagPos.y - (rect.top  + rect.height / 2);
-        const dlen = Math.sqrt(ddx*ddx + ddy*ddy) || 1;
-        const ep   = getLabelEdgePoint(rect, ddx/dlen, ddy/dlen);
-        if (line)  { line.setAttribute('x1',ep.x);  line.setAttribute('y1',ep.y);  line.setAttribute('x2',flagPos.x);  line.setAttribute('y2',flagPos.y);  line.style.display  = show ? '' : 'none'; }
-        if (lineG) { lineG.setAttribute('x1',ep.x); lineG.setAttribute('y1',ep.y); lineG.setAttribute('x2',flagPos.x); lineG.setAttribute('y2',flagPos.y); lineG.style.display = show ? '' : 'none'; }
-      }
-    });
+    // Línea SVG: del nodo (superficie del globo) al borde interior de la bandera
+    const svgLine = svg.querySelector(`line[data-fc="${group.flagCode}"]`);
+    if (svgLine) {
+      svgLine.setAttribute('x1', flagPos.x);
+      svgLine.setAttribute('y1', flagPos.y);
+      svgLine.setAttribute('x2', flagX - nx * FLAG_HALF);
+      svgLine.setAttribute('y2', flagY - ny * FLAG_HALF);
+      svgLine.style.opacity    = show ? '1' : '0';
+      svgLine.style.visibility = show ? 'visible' : 'hidden';
+    }
   });
 }
 
 // ── Intro animation ───────────────────────────────────────────────────────────
 
-globeGroup.scale.set(0.001, 0.001, 0.001);
-gsap.to(globeGroup.scale, { x:1, y:1, z:1, duration:1.6, ease:'elastic.out(1,0.55)', delay:0.2 });
-
 const { z: _tz } = getResponsiveCamera();
 const _tx = computeGlobeCenterX();
-camera.position.set(_tx, 0, _tz + 3.5);
+
+globeGroup.scale.set(0.001, 0.001, 0.001);
+
+// Set initial vertical offsets for UI drift-in
+gsap.set(['#left-hero', '#hint-panel'],         { y: -16 });
+gsap.set(['#inscripciones-card', '#footer-nav'], { y:  16 });
+
+// Canvas fades up from darkness as the globe materialises
+gsap.to('#globe-canvas', { opacity: 1, duration: 1.8, ease: 'power2.inOut', delay: 0.1 });
+
+// Globe expands without elastic bounce — smooth expo deceleration
+gsap.to(globeGroup.scale, { x: 1, y: 1, z: 1, duration: 2.2, ease: 'expo.out', delay: 0.25 });
+
+// Camera drifts in from farther back — cinematic pull-in arc
+camera.position.set(_tx, 0, _tz + 5.0);
 
 requestAnimationFrame(() => {
   computeSafeBounds();
-  gsap.to(camera.position, { z: _tz, duration:2.2, ease:'power3.out', delay:0.1 });
+  gsap.to(camera.position, { z: _tz, duration: 3.2, ease: 'power2.inOut', delay: 0.1 });
 });
+
+// UI elements drift in sequentially once the globe has settled
+gsap.to('#left-hero',          { opacity: 1, y: 0, duration: 0.9, ease: 'power2.out', delay: 1.6 });
+gsap.to('#hint-panel',         { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out', delay: 1.9 });
+gsap.to('#footer-nav',         { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out', delay: 2.1 });
+gsap.to('#inscripciones-card', { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out', delay: 2.2 });
 
 // ── Raycaster ─────────────────────────────────────────────────────────────────
 
@@ -900,11 +953,13 @@ canvas.addEventListener('pointerdown', e => {
   isDragging = true;
   prevMouse  = { x: e.clientX, y: e.clientY };
   _downPos   = { x: e.clientX, y: e.clientY };
+  canvas.setPointerCapture(e.pointerId);
 });
 
 window.addEventListener('pointerup', e => {
   if (!e.isPrimary) return;
   isDragging = false;
+  stopRotationSound();
 });
 
 window.addEventListener('pointermove', e => {
@@ -914,6 +969,7 @@ window.addEventListener('pointermove', e => {
   globeGroup.rotation.x += dy * 0.005;
   globeGroup.rotation.x  = Math.max(-0.6, Math.min(0.6, globeGroup.rotation.x));
   prevMouse = { x: e.clientX, y: e.clientY };
+  startRotationSound();
 });
 
 // ── Hover: resalta el país ────────────────────────────────────────────────────
@@ -944,6 +1000,9 @@ canvas.addEventListener('pointerup', e => {
   _downPos   = null;
   if (Math.sqrt(dx * dx + dy * dy) > 8) return; // fue un drag, no un click
 
+  // Clic en el canvas mientras el panel está abierto → cerrar panel y reanudar
+  if (currentPanelIndex !== -1) { closePanel(); resumeRotation(); return; }
+
   // 1. Usar hoveredIso si ya está detectado
   if (hoveredIso && OUR_ISO.has(hoveredIso)) {
     const flagCode = isoToFlagCode[hoveredIso];
@@ -958,28 +1017,25 @@ canvas.addEventListener('pointerup', e => {
     drawHighlight(feature);
     canvas.classList.add('country-hover');
     const flagCode = isoToFlagCode[iso];
-    if (flagCode) openPanel(flagCode);
+    if (flagCode) { openPanel(flagCode); return; }
   }
+
+  // Click en zona vacía del globo → reanudar rotación si está detenida
+  resumeRotation();
 });
 
-// Touch (móvil)
-canvas.addEventListener('touchend', e => {
-  if (e.changedTouches.length === 0) return;
-  const t       = e.changedTouches[0];
-  const feature = detectCountryAt(t.clientX, t.clientY);
-  const iso     = feature?.properties?.ISO_A2 ?? null;
-  if (iso && OUR_ISO.has(iso)) {
-    hoveredIso = iso;
-    drawHighlight(feature);
-    canvas.classList.add('country-hover');
-    const flagCode = isoToFlagCode[iso];
-    if (flagCode) openPanel(flagCode);
-  }
-}, { passive: true });
+
+// ── Footer nav — siempre debajo del globo ────────────────────────────────────
+
+const footerNavEl = document.getElementById('footer-nav');
+let   footerDynamic = false;
+// Arranca después de que el intro GSAP termina (~2.8 s)
+setTimeout(() => { footerDynamic = true; }, 3200);
 
 // ── Render loop ───────────────────────────────────────────────────────────────
 
-const clock = new THREE.Clock();
+const clock  = new THREE.Clock();
+const rotObj = { speed: 0.08 };
 
 function animate() {
   requestAnimationFrame(animate);
@@ -987,7 +1043,7 @@ function animate() {
   const t  = clock.elapsedTime;
 
   timeUniform.value = t;
-  if (!isDragging) globeGroup.rotation.y -= dt * 0.08;
+  if (!isDragging) globeGroup.rotation.y -= dt * rotObj.speed;
   stars.rotation.y += dt * 0.004;
 
   updatePositions();
