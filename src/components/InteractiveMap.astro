@@ -1,0 +1,17 @@
+---
+// Globo interactivo embebido como componente dentro del flujo de la página.
+// Se incrusta vía <iframe> apuntando a /mapa-embed para aislar por completo el
+// CSS (resets globales, overflow:hidden) y la lógica WebGL del mapa, que está
+// dimensionada respecto a `window`. Dentro del iframe `window` ≡ tamaño del
+// mapa, por lo que la proyección de marcadores y el hit-testing del puntero
+// quedan alineados sin tocar el código del globo.
+---
+
+<section class="relative w-full overflow-hidden bg-morado-oscuro">
+    <iframe
+        src="/mapa-embed/"
+        title="Mapa interactivo de convenios internacionales UC"
+        loading="lazy"
+        class="block h-screen w-full border-0"
+        allow="autoplay"></iframe>
+</section>

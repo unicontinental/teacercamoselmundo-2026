@@ -3,7 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import SectionTitle from "../../components/SectionTitle.astro";
 import GlobalExperience from "../../components/GlobalExperience.astro";
 import Metrics from "../../components/Metrics.astro";
-import Map from "../../components/Map.astro";
+import InteractiveMap from "../../components/InteractiveMap.astro";
 import Internationalization from "../../components/Internationalization.astro";
 import DoubleDegree from "../../components/DoubleDegree.astro";
 import Memberships from "../../components/Memberships.astro";
@@ -46,40 +46,7 @@ import Cie from "../../components/Cie.astro";
             },
         ]}
     />
-    <Map />
+    <InteractiveMap />
     <Internationalization />
     <DoubleDegree />
-    <Memberships />
-	<Acordeon
-		width="full"
-		title="<span class='font-light'>Convenios con</span> \nUniversidades Reconocidas \nen el QS World University \nRankings"
-		paragraph="Te acercamos a las mejores universidades de Latinoamérica, según el Ranking QS, para que realices pasantías internacionales, clases en simultáneo con estudiantes y docentes extranjeros, y más."
-		paragraphAlign="center"
-		items={[
-			{
-				image: pontificiaChile,
-				flag: flagChile,
-				title: "Chile",
-				paragraph: "Pontificia Universidad Católica de Chile",
-			},
-			{
-				image: saopauloBrasil,
-				flag: flagBrasil,
-				title: "Brasil",
-				paragraph: "Universida de São Paulo",
-			},
-			{
-				image: estadualBrasil,
-				flag: flagBrasil,
-				title: "Brasil",
-				paragraph: "Universidad Estadual de Campinas",
-			},
-			{
-				image: tecMonterrey,
-				flag: flagMexico,
-				title: "México",
-				paragraph: "TEC de Monterrey",
-			},
-		]}
-	/>
 </Layout>

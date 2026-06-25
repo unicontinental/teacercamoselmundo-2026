@@ -252,7 +252,7 @@ html, body {
 #left-hero {
   position: absolute;
   top: 0; left: 0;
-  padding: clamp(12px, 1.6vw, 22px) 0 0 clamp(12px, 1.6vw, 22px);
+  padding: clamp(60px, 7vw, 100px) 0 0 clamp(12px, 1.6vw, 22px);
   display: flex;
   flex-direction: column;
   pointer-events: none;

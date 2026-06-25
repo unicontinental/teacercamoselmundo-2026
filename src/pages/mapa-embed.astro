@@ -1,4 +1,9 @@
 ---
+// Versión del globo pensada para incrustarse vía <iframe> dentro de otras
+// páginas (p. ej. ruta-internacional). No usa el Layout del sitio, por lo que
+// no incluye header/footer ni el botón flotante de WhatsApp. Dentro del iframe,
+// `window` equivale al tamaño del mapa, así que toda la lógica de proyección y
+// hit-testing del globo funciona sin modificaciones.
 import GlobeScene from "../components/GlobeScene.astro";
 ---
 
@@ -7,11 +12,8 @@ import GlobeScene from "../components/GlobeScene.astro";
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Universidad Continental – Mapa Mundial UC</title>
-        <meta
-            name="description"
-            content="Explora en un globo interactivo las universidades e instituciones asociadas a la Universidad Continental alrededor del mundo."
-        />
+        <title>Mapa interactivo UC</title>
+        <meta name="robots" content="noindex" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
@@ -20,6 +22,6 @@ import GlobeScene from "../components/GlobeScene.astro";
         />
     </head>
     <body>
-        <GlobeScene />
+        <GlobeScene showInscripciones={false} />
     </body>
 </html>
