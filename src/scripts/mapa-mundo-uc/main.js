@@ -12,10 +12,12 @@ import { NUMERIC_TO_ISO2 } from './isoNumeric.js';
 const atmosphereVS = `
   varying vec3 vNormal;
   varying vec3 vViewDir;
+  varying vec3 vLocalNorm;
   void main() {
-    vNormal = normalize(normalMatrix * normal);
+    vNormal    = normalize(normalMatrix * normal);
     vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
-    vViewDir = normalize(-mvPos.xyz);
+    vViewDir   = normalize(-mvPos.xyz);
+    vLocalNorm = normalize(position);
     gl_Position = projectionMatrix * mvPos;
   }
 `;
@@ -25,9 +27,12 @@ const atmosphereFS = `
   uniform float opacity;
   varying vec3 vNormal;
   varying vec3 vViewDir;
+  varying vec3 vLocalNorm;
   void main() {
+    if (abs(vLocalNorm.y) > 0.85) discard;
+    float poleMask = 1.0 - smoothstep(0.58, 0.97, abs(vLocalNorm.y));
     float rim = 1.0 - max(dot(vNormal, vViewDir), 0.0);
-    rim = pow(rim, glowPower);
+    rim = pow(rim, glowPower) * poleMask;
     gl_FragColor = vec4(glowColor * rim, rim * opacity);
   }
 `;
@@ -95,31 +100,7 @@ const globeFS = `
     float bottomShadow = smoothstep(0.18, -0.52, vNormal.y) * 0.25;
     color *= 1.0 - bottomShadow;
 
-    // Back-light – subtle purple rim on the dark terminator edge to separate from background
-    float darkEdge = pow(rim, 2.8) * smoothstep(0.08, -0.30, NdotL);
-    color += vec3(0.28, 0.04, 0.52) * darkEdge * 0.48;
-
     gl_FragColor = vec4(color, 1.0);
-  }
-`;
-
-const ringVS = `
-  varying vec2 vUv;
-  void main() {
-    vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-  }
-`;
-const ringFS = `
-  uniform vec3  ringColor;
-  uniform float time;
-  varying vec2 vUv;
-  void main() {
-    float dist = abs(vUv.y - 0.5) * 2.0;
-    float glow = pow(1.0 - dist, 4.5);
-    float sweep = sin(vUv.x * 6.2831 * 4.0 + time * 2.5) * 0.5 + 0.5;
-    glow *= (0.75 + sweep * 0.25);
-    gl_FragColor = vec4(ringColor, glow * 0.92);
   }
 `;
 
@@ -273,20 +254,6 @@ const globeMaterial = new THREE.ShaderMaterial({
 const globeMesh = new THREE.Mesh(new THREE.SphereGeometry(GLOBE_R, 64, 64), globeMaterial);
 globeGroup.add(globeMesh);
 
-// Atmosphere – inner halo: intense violet on the illuminated rim
-globeGroup.add(new THREE.Mesh(
-  new THREE.SphereGeometry(GLOBE_R + 0.022, 64, 64),
-  new THREE.ShaderMaterial({
-    vertexShader: atmosphereVS, fragmentShader: atmosphereFS,
-    uniforms: {
-      glowColor: { value: new THREE.Color(0xee55ff) },
-      glowPower: { value: 2.0 },
-      opacity:   { value: 1.50 },
-    },
-    transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.FrontSide,
-  })
-));
-
 // Atmosphere – outer halo: wider, softer violet glow for depth separation
 globeGroup.add(new THREE.Mesh(
   new THREE.SphereGeometry(GLOBE_R + 0.10, 64, 64),
@@ -294,27 +261,12 @@ globeGroup.add(new THREE.Mesh(
     vertexShader: atmosphereVS, fragmentShader: atmosphereFS,
     uniforms: {
       glowColor: { value: new THREE.Color(0xaa22ee) },
-      glowPower: { value: 4.8 },
-      opacity:   { value: 0.60 },
+      glowPower: { value: 1.5 },
+      opacity:   { value: 0.22 },
     },
     transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.FrontSide,
   })
 ));
-
-// ── Orbital rings ─────────────────────────────────────────────────────────────
-
-const timeUniform = { value: 0 };
-
-function makeRing(inner, outer, rotX, rotZ, hexColor) {
-  const mat = new THREE.ShaderMaterial({
-    vertexShader: ringVS, fragmentShader: ringFS,
-    uniforms: { ringColor: { value: new THREE.Color(hexColor) }, time: timeUniform },
-    transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
-  });
-  const m = new THREE.Mesh(new THREE.RingGeometry(inner, outer, 256), mat);
-  m.rotation.x = rotX; m.rotation.z = rotZ;
-  return m;
-}
 
 // ── GeoJSON ───────────────────────────────────────────────────────────────────
 
@@ -356,6 +308,8 @@ async function loadGeoJSON(group, radius, opacity) {
       const g = f.geometry; if (!g) return;
       const polys = g.type==='Polygon'?[g.coordinates]:g.type==='MultiPolygon'?g.coordinates:[];
       polys.forEach(poly => poly.forEach(ring => {
+        const lons = ring.map(([lo]) => lo);
+        if (Math.max(...lons) - Math.min(...lons) > 350) return;
         const v = ring.map(([lo,la]) => latLonToVec3(la, lo, r));
         for (let i=0;i<v.length-1;i++) {
           const a = v[i], b = v[i+1];
@@ -394,6 +348,8 @@ async function createCountryTexture() {
     polys.forEach(poly => {
       ctx.beginPath();
       poly.forEach(ring => {
+        const lons = ring.map(([lo]) => lo);
+        if (Math.max(...lons) - Math.min(...lons) > 350) return;
         ring.forEach(([lo,la],i) => {
           const x=(lo+180)/360*W, y=(90-la)/180*H;
           i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
@@ -1042,7 +998,6 @@ function animate() {
   const dt = clock.getDelta();
   const t  = clock.elapsedTime;
 
-  timeUniform.value = t;
   if (!isDragging) globeGroup.rotation.y -= dt * rotObj.speed;
   stars.rotation.y += dt * 0.004;
 
