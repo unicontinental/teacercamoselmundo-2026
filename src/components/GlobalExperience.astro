@@ -1,12 +1,15 @@
 ---
-import { Icon } from "astro-icon/components";
+// Título de dos tonos según Figma: "RUTA" en Neue Plak Regular (fina) +
+// "INTERNACIONAL" en Neue Plak WideBold (ancha). La variante Neue Plak Narrow
+// del diseño no está disponible en el proyecto, por lo que se usa el peso
+// Regular de la familia ya cargada como aproximación fiel a la marca.
 ---
 <section class="bg-white">
     <div class="max-w-7xl mx-auto px-4 md:px-5 py-16 md:py-24 flex flex-col justify-center items-center">
-        <Icon name="teacercamoselmundo-black" class="max-w-4xl w-full h-auto md:mb-16 mb-8" />
-        <p class="text-center text-base md:text-2xl leading-relaxed max-w-4xl">En la <strong>Universidad Continental</strong> acercamos el mundo a cada campus, a cada ciudad, a cada estudiante con convenios globales, doble título internacional y clases en simultáneo con estudiantes y docentes extranjeros.
-        </p>
-        <p class="text-center text-base md:text-2xl leading-relaxed max-w-4xl mt-6">Nuestras excelencia académica está avalada por los más altos estándares internacionales en Estados Unidos, España y Reino Unido.
+        <h2 class="text-2xl md:text-5xl text-center uppercase leading-tight md:leading-none text-[#5A00AA] mb-8 md:mb-16">
+            <span class="font-sans font-normal">Ruta</span> <span class="font-wideBold">Internacional</span>
+        </h2>
+        <p class="text-center text-base md:text-2xl leading-relaxed max-w-4xl">En la <strong>Universidad Continental</strong> acercamos el mundo a cada campus, a cada ciudad, a cada estudiante con convenios globales, doble título internacional y clases en simultáneo con estudiantes y docentes extranjeros. Además, <strong>somos parte de Continental International Education (CIE)</strong>, una propuesta educativa internacional con presencia en Estados Unidos, México, España y Perú.
         </p>
     </div>
 </section>

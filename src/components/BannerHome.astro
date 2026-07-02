@@ -1,96 +1,19 @@
 ---
-import { Image } from "astro:assets";
-import bannerMobile from "../assets/bg-banner-sm.png";
-import bannerDesktop from "../assets/bg-banner.webp";
-import teAcercamos from "../assets/te-acercamos.svg";
-import elMundo from "../assets/el-mundo.svg";
-import futuro from "../assets/elige-un-futuro-internacional.svg";
+import bannerVideo from "../assets/animations/banner.mp4";
+import bannerPoster from "../assets/bg-banner.webp";
 ---
 <section class="relative bg-black overflow-hidden">
-  <!-- Desktop image -->
-  <div class="hidden md:block absolute inset-0 w-full h-full pointer-events-none">
-    <Image
-      src={bannerDesktop}
-      alt=""
-      class="w-full h-full object-cover object-center"
-      loading="eager"
-      fetchpriority="high"
-    />
-  </div>
-  <!-- Mobile image -->
-  <div class="md:hidden absolute inset-0 w-full h-full pointer-events-none">
-    <Image
-      src={bannerMobile}
-      alt=""
-      class="w-full h-full object-cover object-center"
-      loading="eager"
-      fetchpriority="high"
-    />
-  </div>
-
-  <div class="relative z-10 max-w-7xl mx-auto px-4 lg:px-5 py-16 lg:py-20">
-    <div class="h-52 md:h-120"></div>
-    <div>
-      <div class="flex items-center gap-4 max-w-7xl">
-        <Image src={teAcercamos} alt="Te acercamos al mundo" class="w-full h-full md:max-w-7/12 enter-left" />
-        <Image src={elMundo} alt="El mundo" class="w-full h-full md:max-w-5/12 enter-right" />
-      </div>
-      <Image src={futuro} alt="Elige un futuro internacional" class="w-full h-full md:max-w-220 object-center mx-auto enter-up" />
-    </div>
-  </div>
+  <h1 class="sr-only">Te acercamos el mundo — Elige un futuro internacional</h1>
+  <video
+    class="block w-full h-auto"
+    autoplay
+    muted
+    loop
+    playsinline
+    preload="auto"
+    poster={bannerPoster.src}
+    aria-label="Te acercamos el mundo. Elige un futuro internacional."
+  >
+    <source src={bannerVideo} type="video/mp4" />
+  </video>
 </section>
-
-<style>
-  .enter-left {
-    animation: enter-left 0.8s ease-out both;
-  }
-
-  .enter-right {
-    animation: enter-right 0.8s ease-out both;
-  }
-
-  .enter-up {
-    animation: enter-up 0.8s ease-out both;
-  }
-
-  @keyframes enter-left {
-    from {
-      opacity: 0;
-      transform: translateX(-60px) scale(0.9);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0) scale(1);
-    }
-  }
-
-  @keyframes enter-right {
-    from {
-      opacity: 0;
-      transform: translateX(60px) scale(0.9);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0) scale(1);
-    }
-  }
-
-  @keyframes enter-up {
-    from {
-      opacity: 0;
-      transform: translateY(60px) scale(0.9);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .enter-left,
-    .enter-right,
-    .enter-up {
-      animation: none;
-    }
-  }
-</style>

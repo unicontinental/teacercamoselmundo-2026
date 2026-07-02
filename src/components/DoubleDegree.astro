@@ -3,22 +3,72 @@ import { Image } from "astro:assets";
 import usIcon from "../assets/icons/us.svg";
 import peIcon from "../assets/icons/pe.svg";
 import sello from "../assets/sello-doble-titulacion.png";
+import selloMba from "../assets/sello-mba.png";
 ---
 <section class="bg-morado-oscuro">
-    <div class="max-w-7xl mx-auto px-4 md:px-5 py-16 md:py-24">
-        <div class="max-w-5xl mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-2 border-l-2 border-white border-r-2 text-white px-5 items-center justify-center pb-2">
-                <div class="flex items-center gap-4 md:col-span-1">
-                    <Image src={sello} alt="Sello doble titulación" width={96} height={96} class="h-20 w-20 md:h-24 md:w-24 object-contain shrink-0" />
-                    <h3 class="text-2xl md:text-3xl font-bold">Accede a un doble título Internacional</h3>
+    <div
+        class="max-w-7xl mx-auto px-4 md:px-5 py-16 md:py-24"
+        x-data="{
+            active: 0,
+            count: 2,
+            prev() { this.active = (this.active - 1 + this.count) % this.count },
+            next() { this.active = (this.active + 1) % this.count }
+        }"
+    >
+        <div class="max-w-5xl mx-auto overflow-hidden">
+            <div
+                class="flex transition-transform duration-500 ease-out"
+                :style="`transform: translateX(-${active * 100}%)`"
+            >
+                {/* Slide 1 — Doble título */}
+                <div class="w-full shrink-0 px-1">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-2 border-l-2 border-r-2 border-white text-white px-5 items-center">
+                        <div class="flex items-center gap-4 md:col-span-1">
+                            <Image src={sello} alt="Sello doble titulación internacional" width={96} height={96} class="h-20 w-20 md:h-24 md:w-24 object-contain shrink-0" />
+                            <h3 class="text-2xl md:text-3xl font-bold">Accede a un doble título Internacional</h3>
+                        </div>
+                        <p class="md:text-lg md:col-span-2">
+                            Estudia en la Universidad Continental
+                            <Image src={peIcon} alt="Perú" class="inline-block h-6 w-6 align-middle mx-1" />
+                            y luego elige una carrera en Continental Florida University
+                            <Image src={usIcon} alt="Estados Unidos" class="inline-block h-6 w-6 align-middle mx-1" />
+                        </p>
+                    </div>
                 </div>
-                <p class="md:text-lg md:col-span-2">
-                    Estudia en la Universidad Continental
-                    <Image src={peIcon} alt="Perú" class="inline-block h-6 w-6 align-middle mx-1" />
-                    y luego elige una carrera en Continental Florida University
-                    <Image src={usIcon} alt="Estados Unidos" class="inline-block h-6 w-6 align-middle mx-1" />
-                </p>
+
+                {/* Slide 2 — Ingeniero industrial con MBA */}
+                <div class="w-full shrink-0 px-1">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-2 border-l-2 border-r-2 border-white text-white px-5 items-center">
+                        <div class="flex items-center gap-4 md:col-span-1">
+                            <Image src={selloMba} alt="Sello carrera + MBA en 5 años" width={96} height={96} class="h-20 w-20 md:h-24 md:w-24 object-contain shrink-0" />
+                            <h3 class="text-2xl md:text-3xl font-bold">Conviértete en un ingeniero industrial con MBA en 5 años</h3>
+                        </div>
+                        <p class="md:text-lg md:col-span-2">
+                            Estudia Ingeniería Industrial en la Universidad Continental
+                            <Image src={peIcon} alt="Perú" class="inline-block h-6 w-6 align-middle mx-1" />
+                            y accede a una maestría internacional desde el 4to ciclo.
+                        </p>
+                    </div>
+                </div>
             </div>
+        </div>
+
+        {/* Controles */}
+        <div class="flex items-center justify-center gap-3 mt-8">
+            <button type="button" @click="prev()" aria-label="Anterior" class="text-white/80 hover:text-white transition cursor-pointer p-2">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
+                </svg>
+            </button>
+            <div class="flex items-center gap-2.5">
+                <button type="button" @click="active = 0" aria-label="Ir al slide 1" class="rounded-full transition-all cursor-pointer" :class="active === 0 ? 'size-4 bg-purpura' : 'size-3 bg-white/40'"></button>
+                <button type="button" @click="active = 1" aria-label="Ir al slide 2" class="rounded-full transition-all cursor-pointer" :class="active === 1 ? 'size-4 bg-purpura' : 'size-3 bg-white/40'"></button>
+            </div>
+            <button type="button" @click="next()" aria-label="Siguiente" class="text-white/80 hover:text-white transition cursor-pointer p-2">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+                </svg>
+            </button>
         </div>
     </div>
 </section>

@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Oculta elementos con x-cloak hasta que Alpine inicializa (evita flash de modales) */
+[x-cloak] {
+	display: none !important;
+}
+
 
 @theme {
 	--color-black: #121212;

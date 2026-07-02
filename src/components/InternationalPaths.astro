@@ -2,14 +2,17 @@
 import { Image } from "astro:assets";
 import acercaAlMundo from "../assets/acerca-al-mundo.webp";
 import rutaInternacional from "../assets/ruta-internacional.webp";
-import cursos from "../assets/cursos.webp";
+// import cursos from "../assets/cursos.webp"; // Oculto: tarjeta Cursos Libres deshabilitada
 ---
 <section class="bg-white">
     <div class="max-w-7xl mx-auto px-4 md:px-5 py-16 md:py-20">
-        <h2 class="font-wideBold text-2xl md:text-5xl mb-6 md:mb-15 md:whitespace-pre-line text-center uppercase leading-tight md:leading-18">¿Qué futuro internacional
-        eliges hoy?</h2>
+        <h2 class="text-2xl md:text-5xl mb-6 md:mb-15 text-center uppercase leading-tight text-[#5A00AA]">
+            <span class="font-sans font-normal">¿Qué</span> <span class="font-wideBold">Futuro</span><br />
+            <span class="font-wideBold">Internacional</span><br />
+            <span class="font-wideBold">Eliges</span> <span class="font-sans font-normal">Hoy?</span>
+        </h2>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 md:gap-0 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 md:gap-8 gap-4 max-w-3xl mx-auto">
             <div class="flex flex-col items-center justify-center max-w-80 mx-auto">
                 <a href="/experiencias-globales" class="block group">
                     <Image
@@ -43,6 +46,7 @@ import cursos from "../assets/cursos.webp";
                     </p>
                 </a>
             </div>
+            {/* Oculto temporalmente: tarjeta "Cursos Libres" (página deshabilitada).
             <div class="flex flex-col items-center justify-center max-w-80 mx-auto">
                 <a href="/cursos" class="block group">
                     <Image
@@ -59,6 +63,7 @@ import cursos from "../assets/cursos.webp";
                     </p>
                 </a>
             </div>
+            */}
         </div>
     </div>
 </section>

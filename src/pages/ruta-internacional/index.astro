@@ -19,7 +19,9 @@ import Cie from "../../components/Cie.astro";
 ---
 
 <Layout>
-    <SectionTitle title="Ruta Internacional" />
+    {/* Oculto en Figma (banda "Background" con el título grande "ruta internacional"). Se deja comentado por si se reactiva. */}
+    {/* <SectionTitle title="Ruta Internacional" /> */}
+    <InteractiveMap />
     <GlobalExperience />
     <hr class="border-gris max-w-7xl mx-auto" />
     <Metrics
@@ -46,7 +48,9 @@ import Cie from "../../components/Cie.astro";
             },
         ]}
     />
-    <InteractiveMap />
     <Internationalization />
     <DoubleDegree />
+    {/* Oculto en Figma: sección CIE "Somos parte de Continental International Education" (Memberships). Se deja comentado. */}
+    {/* <Memberships /> */}
+    {/* <Cie /> */}
 </Layout>

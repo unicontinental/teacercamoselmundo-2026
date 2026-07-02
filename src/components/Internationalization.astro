@@ -2,39 +2,89 @@
 import { Image } from "astro:assets";
 import cfu from "../assets/CFU.png";
 import ciu from "../assets/CIU.png";
+import cfuH from "../assets/CFU-h.png";
+import ciuH from "../assets/CIU-h.png";
+// Tarjetas CFU/CIU: los PNG ya traen horneado el diseño del Figma
+// (foto + logo + bandera + nombre + flecha). En desktop se usan las
+// versiones panorámicas (horizontal) y en móvil las cuadradas.
+// Al hacer click, la misma tarjeta revela la descripción de la universidad.
 ---
 
 <section>
     <div class="max-w-7xl mx-auto px-4 md:px-5 py-16 md:py-24">
-        <h2 class="font-wideBold text-2xl md:text-5xl mb-6 md:mb-15 md:whitespace-pre-line text-center uppercase leading-tight md:leading-18">Propuesta académica
-            internacional</h2>
-        <p class="text-center text-base md:text-lg leading-relaxed md:whitespace-pre-line">En la Universidad Continental te ofrecemos propuestas académicas en
-Estados Unidos, México y España.
+        <h2 class="text-2xl md:text-5xl mb-6 md:mb-12 text-center uppercase leading-tight md:leading-none text-[#5A00AA]">
+            <span class="font-wideBold">Propuesta</span> <span class="font-sans font-normal">Académica</span><br />
+            <span class="font-wideBold">Internacional</span>
+        </h2>
+        <p class="text-center text-base md:text-2xl leading-relaxed max-w-4xl mx-auto">En la Universidad Continental te ofrecemos propuestas académicas en Estados Unidos y España.
         </p>
-        <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            <div class="relative w-full sm:w-90 h-90 mx-auto">
-                <input type="checkbox" aria-label="Voltear tarjeta CFU" class="peer absolute inset-0 z-20 h-full w-full cursor-pointer opacity-0" />
-                <div class="relative w-full h-full transition-transform duration-500 transform-3d peer-checked:transform-[rotateY(180deg)]">
-                    <div class="absolute inset-0 backface-hidden">
-                        <Image src={cfu} alt="CFU" width={360} height={360} class="max-w-[360px] mx-auto w-full h-full object-cover" />
-                    </div>
-                    <div class="absolute inset-0 bg-black text-white flex flex-col justify-center items-center px-8 text-left backface-hidden transform-[rotateY(180deg)]">
-                        <h3 class="font-wideBold mb-3 whitespace-pre-line md:text-xl">Continental Florida University (CFU)</h3>
-                        <p class="">Es una universidad acreditada en Estados Unidos por la Florida Commission for Independent Education y reconocida con la máxima calificación en Aprendizaje en Línea por QS Stars.
-                            Ofrece programas virtuales de pregrado y posgrado con estándares de calidad estadounidense, orientados al desarrollo profesional en un entorno global.</p>
+        <div class="mt-10 md:mt-14 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
+            {/* CFU */}
+            <div class="relative mx-auto w-full max-w-md md:max-w-none rounded-lg overflow-hidden" x-data="{ open: false }">
+                <button
+                    type="button"
+                    @click="open = true"
+                    :class="open && 'pointer-events-none'"
+                    :aria-expanded="open"
+                    aria-label="Ver más sobre Continental Florida University (CFU)"
+                    class="block w-full cursor-pointer"
+                >
+                    <Image src={cfuH} alt="Continental Florida University (CFU) — Estados Unidos" class="hidden md:block w-full h-auto" />
+                    <Image src={cfu} alt="Continental Florida University (CFU) — Estados Unidos" class="md:hidden w-full h-auto" />
+                </button>
+                <div
+                    x-show="open"
+                    x-cloak
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                    class="absolute inset-0 bg-[#121212] text-white overflow-y-auto"
+                >
+                    <button type="button" @click="open = false" class="absolute top-3 right-3 z-10 text-white/70 hover:text-white cursor-pointer" aria-label="Cerrar">
+                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6l-12 12" /></svg>
+                    </button>
+                    <div class="min-h-full flex flex-col justify-center p-6 md:p-8 text-left">
+                        <h3 class="font-bold text-xl md:text-2xl mb-4 pr-6">Continental Florida University (CFU)</h3>
+                        <p class="text-sm md:text-base leading-relaxed mb-3 text-white/90">Es una universidad acreditada en Estados Unidos por la Florida Commission for Independent Education y reconocida con la máxima calificación en Aprendizaje en Línea por QS Stars.</p>
+                        <p class="text-sm md:text-base leading-relaxed text-white/90">Ofrece programas virtuales de pregrado y posgrado con estándares de calidad estadounidense, orientados al desarrollo profesional en un entorno global.</p>
                     </div>
                 </div>
             </div>
 
-            <div class="relative w-full sm:w-90 h-90 mx-auto">
-                <input type="checkbox" aria-label="Voltear tarjeta CIU" class="peer absolute inset-0 z-20 h-full w-full cursor-pointer opacity-0" />
-                <div class="relative w-full h-full transition-transform duration-500 transform-3d peer-checked:transform-[rotateY(180deg)]">
-                    <div class="absolute inset-0 backface-hidden">
-                        <Image src={ciu} alt="CIU" width={360} height={360} class="max-w-[360px] mx-auto w-full h-full object-cover" />
-                    </div>
-                    <div class="absolute inset-0 bg-black text-white flex flex-col justify-center items-center px-8 text-left backface-hidden transform-[rotateY(180deg)]">
-                        <h3 class="font-wideBold mb-3">Continental International Universities (CIU)</h3>
-                        <p class="">Es una institución educativa española respaldada por la Universidad Politécnica de Madrid y la Fundación Universidad Empresa. Ofrece másteres profesionales con un enfoque práctico, flexible e internacional, alineados a estándares europeos y a las exigencias reales del mercado y del futuro del trabajo.</p>
+            {/* CIU */}
+            <div class="relative mx-auto w-full max-w-md md:max-w-none rounded-lg overflow-hidden" x-data="{ open: false }">
+                <button
+                    type="button"
+                    @click="open = true"
+                    :class="open && 'pointer-events-none'"
+                    :aria-expanded="open"
+                    aria-label="Ver más sobre Continental International Universities (CIU)"
+                    class="block w-full cursor-pointer"
+                >
+                    <Image src={ciuH} alt="Continental International Universities (CIU) — España" class="hidden md:block w-full h-auto" />
+                    <Image src={ciu} alt="Continental International Universities (CIU) — España" class="md:hidden w-full h-auto" />
+                </button>
+                <div
+                    x-show="open"
+                    x-cloak
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                    class="absolute inset-0 bg-[#121212] text-white overflow-y-auto"
+                >
+                    <button type="button" @click="open = false" class="absolute top-3 right-3 z-10 text-white/70 hover:text-white cursor-pointer" aria-label="Cerrar">
+                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6l-12 12" /></svg>
+                    </button>
+                    <div class="min-h-full flex flex-col justify-center p-6 md:p-8 text-left">
+                        <h3 class="font-bold text-xl md:text-2xl mb-4 pr-6">Continental International Universities (CIU)</h3>
+                        <p class="text-sm md:text-base leading-relaxed mb-3 text-white/90">Es una institución educativa española respaldada por la Universidad Politécnica de Madrid y la Fundación Universidad Empresa.</p>
+                        <p class="text-sm md:text-base leading-relaxed text-white/90">Ofrece másteres profesionales con un enfoque práctico, flexible e internacional, alineados a estándares europeos y a las exigencias reales del mercado y del futuro del trabajo.</p>
                     </div>
                 </div>
             </div>
