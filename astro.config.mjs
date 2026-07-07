@@ -7,6 +7,9 @@ import icon from "astro-icon";
 
 // https://astro.build/config
 export default defineConfig({
+    redirects: {
+        "/experiencias-globales": "/tu-puente-al-mundo",
+    },
     integrations: [
         icon({ iconDir: "src/assets/icons" }),
 		alpinejs({ entrypoint: "/src/alpine.js" }),
