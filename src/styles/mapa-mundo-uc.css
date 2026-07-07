@@ -283,7 +283,7 @@ html, body {
 
   font-weight: 500;
   letter-spacing: 0.025em;
-  margin: 0;
+  margin: 0 0 clamp(20px, 2.2vw, 40px);
   line-height: 1.45;
 }
 
@@ -297,35 +297,36 @@ html, body {
    ══════════════════════════════════════════════════════════════════════════════ */
 
 #hint-panel {
-    position: absolute;
-    top: clamp(12px, 1.5vw, 20px);
-    right: clamp(12px, 1.5vw, 20px);
-    width: clamp(150px, 22vw, 320px);
-    background: rgba(8, 3, 24, 0.88);
-    border: 1px solid rgba(130, 65, 220, 0.40);
-    border-radius: 10px;
-    padding: clamp(8px, 0.8vw, 11px) clamp(10px, 1vw, 13px);
+    width: clamp(240px, 20vw, 320px);
+    max-width: 100%;
+    background: rgba(90, 0, 170, 0.60);
+    border: 1px solid rgba(145, 105, 255, 0.60);
+    border-radius: 16px;
+    padding: 16px;
     display: flex;
     align-items: flex-start;
-    gap: 7px;
     pointer-events: none;
     z-index: 5;
     backdrop-filter: blur(10px);
 }
 
 .hint-icon {
-  font-size: clamp(11px, 1vw, 14px);
-  flex-shrink: 0;
-  line-height: 1.5;
+  font-size: 1em;
+  margin-right: 0.35em;
 }
 
 .hint-text {
   font-family: 'Inter', sans-serif;
-  font-size: clamp(10px, 0.95vw, 14px);
+  font-size: clamp(15px, 1.15vw, 20px);
   color: #E9D4FF;
-  line-height: 1.5;
+  line-height: 1.4;
   letter-spacing: 0.01em;
   margin: 0;
+}
+
+.hint-text strong {
+  font-weight: 800;
+  color: #E9D4FF;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════
@@ -1054,8 +1055,7 @@ html, body {
   }
 
   #hint-panel {
-    right: max(20px, calc(50vw - 940px));
-    width: clamp(200px, 16vw, 290px);
+    width: clamp(240px, 18vw, 320px);
   }
 
   #inscripciones-card {

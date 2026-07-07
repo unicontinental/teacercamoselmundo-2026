@@ -23,23 +23,22 @@ const { showInscripciones = true } = Astro.props;
         <!-- University labels -->
         <div id="labels"></div>
 
-        <!-- ══ LEFT SECTION: logo + title + subtitle ══════════════════════ -->
+        <!-- ══ LEFT SECTION: title + subtitle + hint card ═════════════════ -->
         <div id="left-hero">
             <h1 class="lh-title">EDUCACIÓN<br />DE CALIDAD<br />INTERNACIONAL</h1>
             <p class="lh-subtitle">
                 En la Universidad Continental, la educación no es sólo un
-                camino, es un mapa con infinitas rutas hacia tus metas.<br /><br
-                />Gira el globo terráqueo y descubre los convenios y oportunidades internacionales
+                camino, es un mapa con infinitas rutas hacia tus metas.
             </p>
-        </div>
 
-        <!-- ══ RIGHT SECTION — top: hint panel ════════════════════════════ -->
-        <div id="hint-panel">
-            <span class="hint-icon">💡</span>
-            <p class="hint-text">
-                Haz clic en los marcadores del globo para explorar nuestras
-                instituciones asociadas por país.
-            </p>
+            <!-- Tarjeta de pista morada -->
+            <div id="hint-panel">
+                <p class="hint-text">
+                    <span class="hint-icon">💡</span><strong>Gira el globo terráqueo</strong>
+                    y descubre los <strong>convenios</strong> y
+                    <strong>oportunidades internacionales</strong>
+                </p>
+            </div>
         </div>
 
         {

@@ -6,7 +6,7 @@ function getCtx() {
   return _ctx;
 }
 
-// ── Flag hover: cristalino holográfico ────────────────────────────────────────
+// ── Flag hover: tick grave y discreto ─────────────────────────────────────────
 
 let _lastHover = 0;
 
@@ -18,30 +18,26 @@ export function playHoverSound() {
   const ctx = getCtx();
   const t = ctx.currentTime;
 
-  // Frecuencia base con variación aleatoria ±15%
-  const freq = 2600 + Math.random() * 900;
-
   const master = ctx.createGain();
   master.gain.setValueAtTime(0, t);
-  master.gain.linearRampToValueAtTime(0.20, t + 0.016);
-  master.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+  master.gain.linearRampToValueAtTime(0.14, t + 0.004);
+  master.gain.exponentialRampToValueAtTime(0.001, t + 0.11);
   master.connect(ctx.destination);
 
-  // Triada armónica: fundamental + quinta + octava
+  // "Tock" grave y apagado, sin brillo: fundamental + un armónico suave
   [
-    [1.00, 0.65],
-    [1.50, 0.25],
-    [3.00, 0.10],
+    [1.0, 0.85],
+    [2.0, 0.15],
   ].forEach(([ratio, vol]) => {
     const osc = ctx.createOscillator();
     const g   = ctx.createGain();
     osc.type           = 'sine';
-    osc.frequency.value = freq * ratio;
+    osc.frequency.value = 150 * ratio;
     g.gain.value        = vol;
     osc.connect(g);
     g.connect(master);
     osc.start(t);
-    osc.stop(t + 0.26);
+    osc.stop(t + 0.13);
   });
 }
 
@@ -110,35 +106,45 @@ export function stopRotationSound() {
   setTimeout(() => { try { n.stop(); } catch (_) {} }, 700);
 }
 
-// ── Selección de país: acorde holográfico en cascada ─────────────────────────
+// ── Selección de país: click sobrio y grave ───────────────────────────────────
 
 export function playSelectSound() {
-  const ctx  = getCtx();
-  const t    = ctx.currentTime;
-  const base = 490 + Math.random() * 50;
+  const ctx = getCtx();
+  const t   = ctx.currentTime;
 
   const master = ctx.createGain();
-  master.gain.setValueAtTime(0.28, t);
-  master.gain.exponentialRampToValueAtTime(0.001, t + 0.62);
+  master.gain.setValueAtTime(0, t);
+  master.gain.linearRampToValueAtTime(0.22, t + 0.004);
+  master.gain.exponentialRampToValueAtTime(0.001, t + 0.17);
   master.connect(ctx.destination);
 
-  // Arpegio ascendente: raíz, tercera mayor, quinta, octava
-  [
-    [1.000, 0.42, 0.00],
-    [1.259, 0.28, 0.05],
-    [1.498, 0.18, 0.10],
-    [2.000, 0.12, 0.15],
-  ].forEach(([ratio, vol, delay]) => {
-    const osc = ctx.createOscillator();
-    const g   = ctx.createGain();
-    osc.type           = 'sine';
-    osc.frequency.setValueAtTime(base * ratio, t + delay);
-    // Leve descenso de tono para efecto de decaimiento natural
-    osc.frequency.exponentialRampToValueAtTime(base * ratio * 0.982, t + 0.58);
-    g.gain.value = vol;
-    osc.connect(g);
-    g.connect(master);
-    osc.start(t + delay);
-    osc.stop(t + 0.68);
-  });
+  // "Tock" grave y apagado: tono bajo fijo con decaimiento inmediato
+  const osc = ctx.createOscillator();
+  const g   = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = 130;
+  g.gain.value = 1.0;
+  osc.connect(g);
+  g.connect(master);
+  osc.start(t);
+  osc.stop(t + 0.19);
+
+  // Transiente de contacto: soplo de ruido filtrado, casi imperceptible
+  const SR     = ctx.sampleRate;
+  const bufLen = Math.floor(SR * 0.03);
+  const buffer = ctx.createBuffer(1, bufLen, SR);
+  const d      = buffer.getChannelData(0);
+  for (let i = 0; i < bufLen; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / bufLen);
+
+  const noise = ctx.createBufferSource();
+  noise.buffer = buffer;
+  const lp = ctx.createBiquadFilter();
+  lp.type            = 'lowpass';
+  lp.frequency.value = 600;
+  const nG = ctx.createGain();
+  nG.gain.value = 0.25;
+  noise.connect(lp);
+  lp.connect(nG);
+  nG.connect(master);
+  noise.start(t);
 }

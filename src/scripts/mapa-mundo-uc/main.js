@@ -117,6 +117,8 @@ renderer.toneMappingExposure = 1.3;
 const scene  = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
 
+const GLOBE_R = 2.0;
+
 function getResponsiveCamera() {
   const aspect = window.innerWidth / window.innerHeight;
   if (aspect < 0.60) return { z: 11.5, y: 0 };
@@ -125,20 +127,44 @@ function getResponsiveCamera() {
   return                    { z: 6.5,  y: 0 };
 }
 
-function computeGlobeCenterX() {
-  const VW = window.innerWidth;
-  const { z: cz } = getResponsiveCamera();
-  const worldHalfW   = cz * Math.tan(22.5 * Math.PI / 180);
-  const screenOffset = (window.innerWidth >= 900 ? 200 : 0) + 10;
-  return -(screenOffset * (2 * worldHalfW) / VW);
+function getGlobeScreenRadius(camZ) {
+  const angularR = Math.asin(Math.min(0.999, GLOBE_R / camZ));
+  return Math.tan(angularR) / Math.tan(camera.fov * Math.PI / 360) * (window.innerHeight / 2);
+}
+
+// Desplaza la proyección (view offset) para que el globo nunca quede debajo
+// del bloque de título/texto (#left-hero): lo empuja a la derecha en pantallas
+// apaisadas y hacia abajo en formatos verticales, sólo lo necesario y sin
+// sacarlo de pantalla. project() y el raycaster usan la misma matriz, así que
+// banderas, labels y hit-testing siguen alineados.
+function applyGlobeSafeOffset(camZ) {
+  const W = window.innerWidth, H = window.innerHeight, MARGIN = 24;
+  camera.clearViewOffset();
+  const hero = document.getElementById('left-hero');
+  if (hero) {
+    const rect = hero.getBoundingClientRect();
+    const r = getGlobeScreenRadius(camZ);
+    let offX = 0, offY = 0;
+    if (W / H >= 1.05) {
+      const need = rect.right + MARGIN - (W / 2 - r);
+      const room = Math.max(0, W - MARGIN - (W / 2 + r));
+      offX = Math.min(Math.max(0, need), room);
+    } else {
+      const need = rect.bottom + MARGIN - (H / 2 - r);
+      const room = Math.max(0, H - MARGIN - (H / 2 + r));
+      offY = Math.min(Math.max(0, need), room);
+    }
+    if (offX || offY) camera.setViewOffset(W, H, -offX, -offY, W, H);
+  }
+  camera.updateProjectionMatrix();
 }
 
 function applyResponsiveCamera() {
   const { z, y } = getResponsiveCamera();
-  const x = computeGlobeCenterX();
-  const desktopOffset = window.innerWidth >= 900 ? 0.7 : 0;
-  camera.position.set(x + desktopOffset, y, z);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.position.set(0, y, z);
   camera.lookAt(0, 0, 0);
+  applyGlobeSafeOffset(z);
 }
 applyResponsiveCamera();
 
@@ -225,7 +251,6 @@ scene.add(bgPlane);
 
 // ── Globe ─────────────────────────────────────────────────────────────────────
 
-const GLOBE_R    = 2.0;
 const globeGroup = new THREE.Group();
 scene.add(globeGroup);
 
@@ -847,7 +872,6 @@ function updatePositions() {
 // ── Intro animation ───────────────────────────────────────────────────────────
 
 const { z: _tz } = getResponsiveCamera();
-const _tx = computeGlobeCenterX();
 
 globeGroup.scale.set(0.001, 0.001, 0.001);
 
@@ -862,12 +886,18 @@ gsap.to('#globe-canvas', { opacity: 1, duration: 1.8, ease: 'power2.inOut', dela
 gsap.to(globeGroup.scale, { x: 1, y: 1, z: 1, duration: 2.2, ease: 'expo.out', delay: 0.25 });
 
 // Camera drifts in from farther back — cinematic pull-in arc
-camera.position.set(_tx, 0, _tz + 5.0);
+camera.position.z = _tz + 5.0;
 
 requestAnimationFrame(() => {
+  applyGlobeSafeOffset(_tz);
   computeSafeBounds();
   gsap.to(camera.position, { z: _tz, duration: 3.2, ease: 'power2.inOut', delay: 0.1 });
 });
+
+// Las fuentes web cambian la altura/anchura del bloque de texto: remedir
+if (document.fonts?.ready) {
+  document.fonts.ready.then(() => { applyGlobeSafeOffset(_tz); computeSafeBounds(); });
+}
 
 // UI elements drift in sequentially once the globe has settled
 gsap.to('#left-hero',          { opacity: 1, y: 0, duration: 0.9, ease: 'power2.out', delay: 1.6 });
