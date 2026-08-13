@@ -1,0 +1,52 @@
+---
+import { Image } from "astro:assets";
+import tituloDoble from "../assets/doble-titulo.webp";
+import estudiantes from "../assets/estudiantes-doble-titulo.webp";
+import selloDoble from "../assets/sello-doble-titulacion.png";
+import peIcon from "../assets/icons/pe.svg";
+import usIcon from "../assets/icons/us.svg";
+---
+{/* Sección "Doble título" — Figma 3033:6573 (desktop) y 3033:6761 (móvil 360x479).
+    Desktop: título y texto a la izquierda, foto a la derecha con el sello asomando abajo.
+    Móvil: bloque de texto arriba y foto centrada al pie, con el sello arriba a la derecha. */}
+<section class="bg-white">
+    {/* Columnas en la proporción del Figma: texto 641px / foto + sello 488px. */}
+    <div class="max-w-7xl mx-auto px-5 pt-9 pb-0 md:py-16 grid grid-cols-1 md:grid-cols-[57fr_43fr] gap-8 md:gap-12 items-center">
+        <div class="flex flex-col gap-4 md:gap-15">
+            <h2 class="w-full max-w-[641px]">
+                <Image
+                    src={tituloDoble}
+                    alt="Doble título, doble ventaja profesional"
+                    width={1282}
+                    height={381}
+                    class="w-full h-auto"
+                />
+            </h2>
+            <p class="max-w-[641px] text-base md:text-2xl leading-6 md:leading-9">
+                Accede a un título internacional, estudiando en la UC
+                <Image src={peIcon} alt="Perú" class="inline-block h-5 w-5 md:h-6 md:w-6 align-middle mx-1" />
+                y complementando tu formación con una carrera en CFU.
+                <Image src={usIcon} alt="Estados Unidos" class="inline-block h-5 w-5 md:h-6 md:w-6 align-middle ml-1" />
+            </p>
+        </div>
+
+        {/* El sello asoma por el borde derecho de la foto: abajo en desktop, arriba en móvil.
+            El margen derecho en desktop reserva ese espacio dentro del contenedor. */}
+        <div class="relative w-[57%] md:w-full max-w-[415px] md:max-w-[488px] mx-auto md:ml-auto md:mr-0 md:pr-[73px]">
+            <Image
+                src={estudiantes}
+                alt="Estudiantes de la Universidad Continental con doble título internacional"
+                width={830}
+                height={1036}
+                class="w-full h-auto"
+            />
+            <Image
+                src={selloDoble}
+                alt="Sello Doble Título Internacional"
+                width={294}
+                height={300}
+                class="absolute left-[95.6%] md:left-auto md:right-0 top-[23.6%] md:top-auto md:bottom-[6.4%] w-[32%] md:w-[30.3%] h-auto"
+            />
+        </div>
+    </div>
+</section>

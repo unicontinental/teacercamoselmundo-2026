@@ -1,0 +1,57 @@
+---
+import { Image } from "astro:assets";
+import bgMba from "../assets/bg-mba-5-anios.webp";
+import tituloMba from "../assets/proyecta-tu-carrera.webp";
+import selloMba from "../assets/sello_4+1.png";
+import peIcon from "../assets/icons/pe.svg";
+import usIcon from "../assets/icons/us.svg";
+---
+{/* Sección "Proyecta tu carrera" (Figma 3029:4182): banda full-bleed con foto de
+    fondo, título horneado en imagen y el sello 4+1 junto al detalle del programa. */}
+<section class="relative overflow-hidden bg-black">
+    <Image
+        src={bgMba}
+        alt=""
+        width={1920}
+        height={760}
+        class="absolute inset-0 h-full w-full object-cover object-center"
+        aria-hidden="true"
+    />
+    {/* Degradados del diseño: negro 80% arriba y abajo, transparente hacia el centro. */}
+    <div class="absolute inset-0 bg-linear-to-b from-black/80 to-transparent to-38%"></div>
+    <div class="absolute inset-0 bg-linear-to-t from-black/80 from-12% to-transparent to-40%"></div>
+
+    {/* Móvil (Figma 2959:6243): banda vertical de 360x532, texto centrado y sello sobre el titular. */}
+    <div class="relative max-w-7xl mx-auto px-5 py-6 md:py-24 min-h-[540px] md:min-h-[760px] flex flex-col items-center justify-between gap-8 md:gap-16 text-white">
+        <Image
+            src={tituloMba}
+            alt="Proyecta tu carrera. Sé un ingeniero industrial con MBA en 5 años."
+            width={1484}
+            height={300}
+            class="w-full max-w-[742px] h-auto"
+        />
+
+        <div class="w-full max-w-[926px] flex flex-col-reverse md:flex-row items-center gap-4 md:gap-0">
+            <div class="w-full md:w-[776px] text-center md:text-left">
+                <h2 class="text-xl md:text-5xl font-bold leading-6 md:leading-none">
+                    4 años de bachiller + 1 año de MBA
+                </h2>
+                <hr class="my-4 md:my-6 border-0 border-t-2 border-lila" />
+                <p class="text-base md:text-2xl leading-normal md:leading-9">
+                    Estudia Ingeniería Industrial en la UC
+                    <Image src={peIcon} alt="Perú" class="inline-block h-5 w-5 md:h-6 md:w-6 align-middle mx-1" />
+                    y empieza una maestría internacional en CFU
+                    <Image src={usIcon} alt="Estados Unidos" class="inline-block h-5 w-5 md:h-6 md:w-6 align-middle mx-1" />
+                    desde el 4to ciclo.
+                </p>
+            </div>
+            <Image
+                src={selloMba}
+                alt="Sello Bachiller 4+1 Maestría Internacional"
+                width={150}
+                height={150}
+                class="h-15 w-15 md:h-[150px] md:w-[150px] object-contain shrink-0"
+            />
+        </div>
+    </div>
+</section>
