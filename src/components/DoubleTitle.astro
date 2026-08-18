@@ -30,9 +30,9 @@ import usIcon from "../assets/icons/us.svg";
             </p>
         </div>
 
-        {/* El sello asoma por el borde derecho de la foto: abajo en desktop, arriba en móvil.
-            El margen derecho en desktop reserva ese espacio dentro del contenedor. */}
-        <div class="relative w-[57%] md:w-full max-w-[415px] md:max-w-[488px] mx-auto md:ml-auto md:mr-0 md:pr-[73px]">
+        {/* El sello asoma por el borde izquierdo de la foto: abajo en desktop, arriba en móvil.
+            El sobresaliente cae sobre el gap entre columnas, así que no reserva espacio extra. */}
+        <div class="relative w-[57%] md:w-full max-w-[415px] mx-auto md:ml-auto md:mr-0">
             <Image
                 src={estudiantes}
                 alt="Estudiantes de la Universidad Continental con doble título internacional"
@@ -45,7 +45,7 @@ import usIcon from "../assets/icons/us.svg";
                 alt="Sello Doble Título Internacional"
                 width={294}
                 height={300}
-                class="sello-anim absolute left-[95.6%] md:left-auto md:right-0 top-[23.6%] md:top-auto md:bottom-[6.4%] w-[32%] md:w-[30.3%] h-auto"
+                class="sello-anim absolute left-[-15%] md:left-[-56px] top-[68%] md:top-auto md:bottom-[6.4%] w-[32%] md:w-[30.3%] h-auto"
             />
         </div>
     </div>
