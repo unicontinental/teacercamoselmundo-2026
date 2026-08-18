@@ -11,7 +11,7 @@ import usIcon from "../assets/icons/us.svg";
     Móvil: bloque de texto arriba y foto centrada al pie, con el sello arriba a la derecha. */}
 <section class="bg-white">
     {/* Columnas en la proporción del Figma: texto 641px / foto + sello 488px. */}
-    <div class="max-w-7xl mx-auto px-5 pt-9 pb-0 md:py-16 grid grid-cols-1 md:grid-cols-[57fr_43fr] gap-8 md:gap-12 items-center">
+    <div class="max-w-7xl mx-auto px-5 pt-9 md:pt-16 pb-0 grid grid-cols-1 md:grid-cols-[57fr_43fr] gap-8 md:gap-12 items-center">
         <div class="flex flex-col gap-4 md:gap-15">
             <h2 class="w-full max-w-[641px]">
                 <Image
@@ -45,8 +45,71 @@ import usIcon from "../assets/icons/us.svg";
                 alt="Sello Doble Título Internacional"
                 width={294}
                 height={300}
-                class="absolute left-[95.6%] md:left-auto md:right-0 top-[23.6%] md:top-auto md:bottom-[6.4%] w-[32%] md:w-[30.3%] h-auto"
+                class="sello-anim absolute left-[95.6%] md:left-auto md:right-0 top-[23.6%] md:top-auto md:bottom-[6.4%] w-[32%] md:w-[30.3%] h-auto"
             />
         </div>
     </div>
 </section>
+
+<style>
+    /* El sello arranca oculto y "se estampa" al entrar en viewport; luego flota en bucle. */
+    .sello-anim {
+        opacity: 0;
+    }
+
+    .sello-anim.sello-visible {
+        animation:
+            sello-stamp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+            sello-sway 3s ease-in-out 0.8s infinite;
+    }
+
+    @keyframes sello-stamp {
+        from {
+            opacity: 0;
+            transform: scale(1.6) rotate(-14deg);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
+        }
+    }
+
+    /* Balanceo continuo: gira un poco a la derecha, luego a la izquierda, y vuelve al centro. */
+    @keyframes sello-sway {
+        0%,
+        100% {
+            transform: rotate(0deg);
+        }
+        25% {
+            transform: rotate(5deg);
+        }
+        75% {
+            transform: rotate(-5deg);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .sello-anim {
+            opacity: 1;
+        }
+        .sello-anim.sello-visible {
+            animation: none;
+        }
+    }
+</style>
+
+<script>
+    const sellos = document.querySelectorAll(".sello-anim");
+    const observer = new IntersectionObserver(
+        (entries) => {
+            for (const entry of entries) {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("sello-visible");
+                    observer.unobserve(entry.target);
+                }
+            }
+        },
+        { threshold: 0.5 },
+    );
+    sellos.forEach((sello) => observer.observe(sello));
+</script>
