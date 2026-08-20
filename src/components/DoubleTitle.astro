@@ -40,76 +40,55 @@ import usIcon from "../assets/icons/us.svg";
                 height={1036}
                 class="w-full h-auto"
             />
-            <Image
-                src={selloDoble}
-                alt="Sello Doble Título Internacional"
-                width={294}
-                height={300}
-                class="sello-anim absolute left-[-15%] md:left-[-56px] top-[68%] md:top-auto md:bottom-[6.4%] w-[32%] md:w-[30.3%] h-auto"
-            />
+            <div class="absolute left-[-15%] md:left-[-56px] top-[68%] md:top-auto md:bottom-[6.4%] w-[32%] md:w-[30.3%]">
+                <Image
+                    src={selloDoble}
+                    alt="Sello Doble Título Internacional"
+                    width={294}
+                    height={300}
+                    class="w-full h-auto"
+                />
+                {/* Copia del mismo PNG recortada al anillo por máscara radial: solo esta capa balancea. */}
+                <Image
+                    src={selloDoble}
+                    alt=""
+                    aria-hidden="true"
+                    width={294}
+                    height={300}
+                    class="sello-texto absolute inset-0 w-full h-auto"
+                />
+            </div>
         </div>
     </div>
 </section>
 
 <style>
-    /* El sello arranca oculto y "se estampa" al entrar en viewport; luego flota en bucle. */
-    .sello-anim {
-        opacity: 0;
+    /* Recorta la copia superior al anillo del texto; el centro (bandera) queda transparente.
+       El anillo azul es rotacionalmente simétrico, así que al girar cubre sin costuras el
+       texto estático de la capa base. El borde de la máscara cae en azul sólido. */
+    .sello-texto {
+        -webkit-mask: radial-gradient(circle closest-side, transparent 0 50%, #000 52%);
+        mask: radial-gradient(circle closest-side, transparent 0 50%, #000 52%);
+        animation: sello-sway 3s ease-in-out infinite;
     }
 
-    .sello-anim.sello-visible {
-        animation:
-            sello-stamp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
-            sello-sway 3s ease-in-out 0.8s infinite;
-    }
-
-    @keyframes sello-stamp {
-        from {
-            opacity: 0;
-            transform: scale(1.6) rotate(-14deg);
-        }
-        to {
-            opacity: 1;
-            transform: scale(1) rotate(0deg);
-        }
-    }
-
-    /* Balanceo continuo: gira un poco a la derecha, luego a la izquierda, y vuelve al centro. */
+    /* Balanceo continuo del anillo: gira a la derecha, luego a la izquierda, y vuelve al centro. */
     @keyframes sello-sway {
         0%,
         100% {
             transform: rotate(0deg);
         }
         25% {
-            transform: rotate(5deg);
+            transform: rotate(10deg);
         }
         75% {
-            transform: rotate(-5deg);
+            transform: rotate(-10deg);
         }
     }
 
     @media (prefers-reduced-motion: reduce) {
-        .sello-anim {
-            opacity: 1;
-        }
-        .sello-anim.sello-visible {
+        .sello-texto {
             animation: none;
         }
     }
 </style>
-
-<script>
-    const sellos = document.querySelectorAll(".sello-anim");
-    const observer = new IntersectionObserver(
-        (entries) => {
-            for (const entry of entries) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add("sello-visible");
-                    observer.unobserve(entry.target);
-                }
-            }
-        },
-        { threshold: 0.5 },
-    );
-    sellos.forEach((sello) => observer.observe(sello));
-</script>
