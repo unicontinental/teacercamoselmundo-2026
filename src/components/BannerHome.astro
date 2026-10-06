@@ -1,19 +1,28 @@
 ---
-import bannerVideo from "../assets/animations/banner.mp4";
-import bannerPoster from "../assets/bg-banner.webp";
+import { getImage } from "astro:assets";
+import bannerMp4 from "../assets/animations/banner.mp4";
+import bannerWebm from "../assets/animations/banner.webm";
+import bannerPosterSrc from "../assets/banner-poster.jpg";
+
+// Póster = primer fotograma del video (1920x1080), así no hay salto al empezar a reproducir.
+const bannerPoster = await getImage({ src: bannerPosterSrc, format: "webp", width: 1920, quality: 75 });
 ---
 <section class="relative bg-black overflow-hidden">
   <h1 class="sr-only">Te acercamos el mundo — Elige un futuro internacional</h1>
+  {/* width/height + aspect-video reservan el alto del banner antes de que cargue el video (CLS). */}
   <video
-    class="block w-full h-auto"
+    class="block w-full h-auto aspect-video"
+    width="1920"
+    height="1080"
     autoplay
     muted
     loop
     playsinline
-    preload="auto"
+    preload="metadata"
     poster={bannerPoster.src}
     aria-label="Te acercamos el mundo. Elige un futuro internacional."
   >
-    <source src={bannerVideo} type="video/mp4" />
+    <source src={bannerWebm} type="video/webm" />
+    <source src={bannerMp4} type="video/mp4" />
   </video>
 </section>

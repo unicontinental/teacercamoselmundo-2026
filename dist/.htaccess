@@ -1,0 +1,32 @@
+# Servidor de producción: LiteSpeed (compatible con .htaccess de Apache) detrás de Cloudflare.
+
+ErrorDocument 404 /404.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # www → sin www (requiere además el registro DNS de www en Cloudflare)
+  RewriteCond %{HTTP_HOST} ^www\.teacercamoselmundo\.pe$ [NC]
+  RewriteRule ^(.*)$ https://teacercamoselmundo.pe/$1 [R=301,L]
+
+  # /index.html y /carpeta/index.html → URL limpia, para no duplicar contenido
+  RewriteCond %{THE_REQUEST} \s/+(.*/)?index\.html[\s?] [NC]
+  RewriteRule ^ /%1 [R=301,L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header always set Strict-Transport-Security "max-age=31536000"
+  Header always set X-Content-Type-Options "nosniff"
+  # SAMEORIGIN y no DENY: /ruta-internacional/ incrusta /mapa-embed/ en un iframe.
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+  # Assets de Astro llevan hash en el nombre: se pueden cachear 1 año.
+  SetEnvIf Request_URI "^/_astro/" ASTRO_ASSET
+  Header set Cache-Control "public, max-age=31536000, immutable" env=ASTRO_ASSET
+
+  # HTML: siempre revalidar para que los cambios se vean al publicar.
+  <FilesMatch "\.html$">
+    Header set Cache-Control "public, max-age=0, must-revalidate"
+  </FilesMatch>
+</IfModule>
