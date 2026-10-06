@@ -1135,8 +1135,13 @@ html, body {
   .lh-logo    { width: clamp(64px, 18vw, 100px); margin-bottom: 10px; }
   .lh-title   { font-size: clamp(18px, 5.5vw, 28px); }
 
-  /* Hint panel — oculto en móvil */
-  #hint-panel { display: none; }
+  /* Hint panel — versión compacta bajo el subtítulo */
+  #hint-panel {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 12px;
+  }
+  .hint-text { font-size: 11px; line-height: 1.35; }
 
   /* Footer nav — sube para no quedar tapado por la barra del navegador */
   #footer-nav {
@@ -1168,7 +1173,8 @@ html, body {
   .lh-logo    { width: clamp(56px, 16vw, 80px); margin-bottom: 8px; }
   .lh-title   { font-size: clamp(16px, 6vw, 24px); }
 
-  #hint-panel { display: none; }
+  #hint-panel { padding: 8px 10px; }
+  .hint-text  { font-size: 10.5px; }
 
   /* Footer nav visible y con espacio para barra del navegador */
   #footer-nav {
